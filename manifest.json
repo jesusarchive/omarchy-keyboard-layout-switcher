@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "jesusarchive.language-switcher",
+  "name": "Language Switcher",
+  "version": "0.1.0",
+  "author": "jesusarchive",
+  "license": "MIT",
+  "description": "macOS-style input source menu and switcher for the Omarchy bar, with Control-Space and Control-Option-Space.",
+  "kinds": ["bar-widget", "service"],
+  "entryPoints": {
+    "barWidget": "Widget.qml",
+    "service": "Service.qml"
+  },
+  "barWidget": {
+    "displayName": "Language Switcher",
+    "description": "Shows the active keyboard layout as a macOS-style input source icon. Click for the Input menu; switch with Ctrl+Space (previous) and Ctrl+Alt+Space (next).",
+    "category": "Compositor",
+    "aliases": ["keyboard", "input", "language", "layout", "input-source"],
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "showSourceName": false,
+      "showSwitcher": true,
+      "showIndicator": true,
+      "hudTimeoutMs": 900,
+      "hideWhenSingle": false
+    },
+    "schema": [
+      { "key": "showSourceName", "type": "boolean", "label": "Show input source name", "defaultValue": false, "description": "Show the layout name next to the icon in the bar." },
+      { "key": "showSwitcher", "type": "boolean", "label": "Show switcher on Ctrl+Space", "defaultValue": true },
+      { "key": "showIndicator", "type": "boolean", "label": "Show indicator on other switches", "defaultValue": true, "description": "The small badge shown after Ctrl+Alt+Space or a menu pick." },
+      { "key": "hudTimeoutMs", "type": "integer", "label": "Overlay timeout (ms)", "min": 300, "max": 5000, "step": 100, "defaultValue": 900 },
+      { "key": "hideWhenSingle", "type": "boolean", "label": "Hide with a single layout", "defaultValue": false }
+    ]
+  }
+}
