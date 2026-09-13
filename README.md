@@ -7,6 +7,8 @@ for the Input menu, or switch layouts from the keyboard the way macOS does:
 steps to the next one.
 Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
 
+![The EN badge in the Omarchy bar](assets/screenshot.png)
+
 - **Bar badge** with the layout's language code from xkb. Hover for the full
   name ("Spanish"), and turn on **Show Input Source Name** to show it in the
   bar too.
@@ -163,6 +165,7 @@ Files:
 - `SourceIcon.qml`: the badge drawing
 - `Model.js`: pure logic
 - `tests/`
+- `assets/screenshot.png`
 
 ## License
 
