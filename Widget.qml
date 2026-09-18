@@ -127,10 +127,10 @@ Panel {
     labelVisible: false
     fixedWidth: iconRow.implicitWidth + Style.space(12)
     tooltipText: root.opened || !root.activeSource ? "" : root.activeSource.name
-    onPressed: function(buttonCode) {
-      if (buttonCode === Qt.RightButton) { if (root.svc) root.svc.next() }
-      else root.toggle()
-    }
+    // Either button opens the menu. A right click used to switch straight to
+    // the next source, which meant the same gesture did different things here
+    // and on every other bar widget.
+    onPressed: root.toggle()
 
     // The pressed-in look the bar item takes on while its menu is open.
     Rectangle {

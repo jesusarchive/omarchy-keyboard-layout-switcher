@@ -2,8 +2,7 @@
 
 An input source menu for the [Omarchy](https://omarchy.org) bar. The bar shows
 the active keyboard layout as a small badge (`EN`, `ES`). Click it for the Input
-menu, or switch layouts from the keyboard. Ctrl+Space goes back to the source
-you used before, and Ctrl+Alt+Space steps to the next one.
+menu, or bind Ctrl+Space to go straight back to the source you used before.
 Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
 
 ![The EN badge in the bar with the Input menu open, listing English (US) and Spanish](preview.png)
@@ -17,8 +16,8 @@ Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
 - Ctrl+Space switches to the most recently used source and shows a switcher
   listing every source. Hold Ctrl and tap Space again while the switcher is up
   to move down the list.
-- Ctrl+Alt+Space switches to the next source in order and shows a small
-  indicator, with ⇪ while Caps Lock is on.
+- Picking a source from the menu shows a small indicator naming it, with ⇪
+  while Caps Lock is on.
 - Every keyboard switches together, so a second keyboard never stays on the old
   layout. The plugin ignores virtual keyboards and ACPI buttons.
 - The badge and both overlays use Omarchy's menu colors and fonts.
@@ -58,20 +57,22 @@ With a single layout the badge still shows, and switching does nothing. Turn on
 
 ### Keybindings
 
-The plugin doesn't bind any keys. Add these lines to
+The plugin doesn't bind any keys. Add this line to
 `~/.config/hypr/bindings.lua`:
 
 ```lua
 o.bind("CTRL + SPACE", "Previous input source", "omarchy-shell jesusarchive.language-switcher previous")
-o.bind("CTRL + ALT + SPACE", "Next input source", "omarchy-shell jesusarchive.language-switcher next")
 ```
 
-Hyprland reloads the file on save, and the bindings show up in Omarchy's
-keybindings list (Super+K). Omarchy binds neither chord by default. Apps that
-use Ctrl+Space, editor completion for example, stop receiving it.
-To use other keys, change the first argument, for example `"SUPER + SPACE"`. If
+Hyprland reloads the file on save, and the binding shows up in Omarchy's
+keybindings list (Super+K). Omarchy leaves Ctrl+Space free, but apps that use
+it, editor completion for example, stop receiving it.
+To use another key, change the first argument, for example `"SUPER + SPACE"`. If
 Omarchy or another plugin already binds that chord, add `hl.unbind("SUPER + SPACE")`
 on the line before, then check with `hyprctl configerrors`.
+
+Bind `next` the same way if you want a chord that steps forward through the
+sources instead of toggling between the last two.
 
 ### Remove
 
@@ -79,14 +80,13 @@ on the line before, then check with `hyprctl configerrors`.
 omarchy plugin remove jesusarchive.language-switcher
 ```
 
-Then delete the two bindings from `bindings.lua`.
+Then delete the binding from `bindings.lua`.
 
 ## Use
 
 | Where | Action |
 |---|---|
-| Bar: left click | open the Input menu |
-| Bar: right click | switch to the next source |
+| Bar: left or right click | open the Input menu |
 | Menu: click a source | switch to it |
 
 Keys while the menu is open:
@@ -104,8 +104,8 @@ Keys while the menu is open:
 The plugin registers an IPC target:
 
 ```bash
-omarchy-shell jesusarchive.language-switcher previous   # Ctrl+Space
-omarchy-shell jesusarchive.language-switcher next       # Ctrl+Alt+Space
+omarchy-shell jesusarchive.language-switcher previous   # the source used before this one
+omarchy-shell jesusarchive.language-switcher next       # the next source in order
 omarchy-shell jesusarchive.language-switcher set es     # by index, code (ES) or layout (es, us(intl))
 omarchy-shell jesusarchive.language-switcher current    # prints the active code, e.g. EN
 omarchy-shell jesusarchive.language-switcher list       # JSON of every source
@@ -125,7 +125,7 @@ in Omarchy's settings panel:
 |---|---|---|
 | `showSourceName` | `false` | Show the layout name next to the badge |
 | `showSwitcher` | `true` | Show the source list on Ctrl+Space. Turn it off to switch with no overlay |
-| `showIndicator` | `true` | Show the small badge after Ctrl+Alt+Space or a menu pick |
+| `showIndicator` | `true` | Show the small badge after a menu pick or a scripted switch |
 | `hudTimeoutMs` | `900` | How long the switcher and indicator stay up (300 to 5000 ms) |
 | `hideWhenSingle` | `false` | Hide the badge when you have only one layout |
 

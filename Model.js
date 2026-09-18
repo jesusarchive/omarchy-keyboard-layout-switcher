@@ -177,7 +177,7 @@ function previousIndex(recent, active, count) {
   return nextIndex(active, count)
 }
 
-// Ctrl+Alt+Space goes to the next source in order.
+// Steps to the next source in order.
 function nextIndex(active, count) {
   if (count <= 1) return active
   return ((active || 0) + 1) % count

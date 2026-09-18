@@ -113,14 +113,14 @@ Item {
     return activeSource ? activeSource.code : ""
   }
 
-  // Ctrl+Alt+Space moves to the next source and shows the small indicator.
+  // Moves to the next source and shows the small indicator.
   function next() {
     if (sources.length < 2) return "single"
     select(Model.nextIndex(activeIndex, sources.length))
     return activeSource ? activeSource.code : ""
   }
 
-  // Handles a direct pick from the menu, the IPC target or a right click.
+  // Handles a direct pick from the menu or the IPC target.
   function select(index) {
     if (!switchTo(index)) return false
     recent = Model.touchRecent(recent, index, sources.length)

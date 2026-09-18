@@ -144,7 +144,7 @@ test("touchRecent drops indices that no longer exist", () => {
   assert.deepStrictEqual(Model.touchRecent([3, 1, 0], 1, 2), [1, 0])
 })
 
-test("Ctrl+Alt+Space cycles forward and wraps", () => {
+test("nextIndex cycles forward and wraps", () => {
   assert.strictEqual(Model.nextIndex(0, 3), 1)
   assert.strictEqual(Model.nextIndex(2, 3), 0)
   assert.strictEqual(Model.nextIndex(0, 1), 0)
