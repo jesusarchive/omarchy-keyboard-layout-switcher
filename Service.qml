@@ -95,9 +95,9 @@ Item {
     return true
   }
 
-  // Control-Space. The first press goes back to the previously used source and
-  // opens the switcher; each press while it is still up moves down the list,
-  // the way holding Control and tapping Space does on macOS.
+  // Ctrl+Space. The first press goes back to the previously used source and
+  // opens the switcher. Each further press while the switcher is still up moves
+  // down the list, so holding Ctrl and tapping Space walks every source.
   function previous() {
     if (sources.length < 2) return "single"
     var target
@@ -113,7 +113,7 @@ Item {
     return activeSource ? activeSource.code : ""
   }
 
-  // Control-Option-Space moves to the next source and shows the small indicator.
+  // Ctrl+Alt+Space moves to the next source and shows the small indicator.
   function next() {
     if (sources.length < 2) return "single"
     select(Model.nextIndex(activeIndex, sources.length))

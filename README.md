@@ -1,10 +1,9 @@
 # Language Switcher for Omarchy
 
-A macOS-style input source menu for the [Omarchy](https://omarchy.org) bar.
-The bar shows the active keyboard layout as a small badge (`EN`, `ES`). Click it
-for the Input menu, or switch layouts from the keyboard the way macOS does.
-Ctrl+Space goes back to the source you used before, and Ctrl+Alt+Space steps to
-the next one.
+An input source menu for the [Omarchy](https://omarchy.org) bar. The bar shows
+the active keyboard layout as a small badge (`EN`, `ES`). Click it for the Input
+menu, or switch layouts from the keyboard. Ctrl+Space goes back to the source
+you used before, and Ctrl+Alt+Space steps to the next one.
 Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
 
 ![The EN badge in the Omarchy bar](assets/screenshot.png)
@@ -12,12 +11,12 @@ Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
 - The bar badge carries the layout's language code from xkb. Hover it for the
   full name ("Spanish"), or turn on "Show Input Source Name" to put the name in
   the bar as well.
-- The Input menu matches the macOS one. It lists every source with a ✓ on the
-  active one, then "Show Emoji & Symbols" (Omarchy's emoji picker), "Show Input
-  Source Name" and "Open Keyboard Settings…" (`~/.config/hypr/input.lua`).
+- The Input menu lists every source with a ✓ on the active one, then "Show
+  Emoji & Symbols" (Omarchy's emoji picker), "Show Input Source Name" and "Open
+  Keyboard Settings…" (`~/.config/hypr/input.lua`).
 - Ctrl+Space switches to the most recently used source and shows a switcher
-  listing every source. Press it again while the switcher is up to move down the
-  list, the way holding Control and tapping Space does on macOS.
+  listing every source. Hold Ctrl and tap Space again while the switcher is up
+  to move down the list.
 - Ctrl+Alt+Space switches to the next source in order and shows a small
   indicator, with ⇪ while Caps Lock is on.
 - Every keyboard switches together, so a second keyboard never stays on the old
@@ -60,7 +59,7 @@ With a single layout the badge still shows, and switching does nothing. Turn on
 ### Keybindings
 
 The plugin doesn't bind any keys. Add these lines to
-`~/.config/hypr/bindings.lua` for the macOS shortcuts:
+`~/.config/hypr/bindings.lua`:
 
 ```lua
 o.bind("CTRL + SPACE", "Previous input source", "omarchy-shell jesusarchive.language-switcher previous")

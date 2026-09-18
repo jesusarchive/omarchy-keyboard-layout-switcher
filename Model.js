@@ -167,7 +167,7 @@ function touchRecent(recent, index, count) {
   return next
 }
 
-// Control-Space goes to the source used before the current one.
+// Ctrl+Space goes to the source used before the current one.
 function previousIndex(recent, active, count) {
   if (count <= 1) return active
   var list = recent || []
@@ -177,7 +177,7 @@ function previousIndex(recent, active, count) {
   return nextIndex(active, count)
 }
 
-// Control-Option-Space goes to the next source in order.
+// Ctrl+Alt+Space goes to the next source in order.
 function nextIndex(active, count) {
   if (count <= 1) return active
   return ((active || 0) + 1) % count

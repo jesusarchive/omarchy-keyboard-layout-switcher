@@ -126,7 +126,7 @@ test("eventKeyboardName splits once and drops the fcitx5 keyboard", () => {
   assert.strictEqual(Model.eventKeyboardName("hl-virtual-keyboard-fcitx5,English (US)"), "")
 })
 
-test("Control-Space toggles between the two most recent sources", () => {
+test("Ctrl+Space toggles between the two most recent sources", () => {
   let recent = Model.touchRecent([], 0, 3)
   recent = Model.touchRecent(recent, 2, 3)
   assert.deepStrictEqual(recent, [2, 0])
@@ -144,7 +144,7 @@ test("touchRecent drops indices that no longer exist", () => {
   assert.deepStrictEqual(Model.touchRecent([3, 1, 0], 1, 2), [1, 0])
 })
 
-test("Control-Option-Space cycles forward and wraps", () => {
+test("Ctrl+Alt+Space cycles forward and wraps", () => {
   assert.strictEqual(Model.nextIndex(0, 3), 1)
   assert.strictEqual(Model.nextIndex(2, 3), 0)
   assert.strictEqual(Model.nextIndex(0, 1), 0)

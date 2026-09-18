@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "author": "jesusarchive",
   "license": "MIT",
-  "description": "macOS-style input source menu and switcher for the Omarchy bar, with Control-Space and Control-Option-Space.",
+  "description": "Input source menu and switcher for the Omarchy bar, with Ctrl+Space and Ctrl+Alt+Space.",
   "kinds": ["bar-widget", "service"],
   "entryPoints": {
     "barWidget": "Widget.qml",
@@ -13,7 +13,7 @@
   },
   "barWidget": {
     "displayName": "Language Switcher",
-    "description": "Shows the active keyboard layout as a macOS-style input source icon. Click for the Input menu; switch with Ctrl+Space (previous) and Ctrl+Alt+Space (next).",
+    "description": "Shows the active keyboard layout as an input source icon. Click for the Input menu; switch with Ctrl+Space (previous) and Ctrl+Alt+Space (next).",
     "category": "Compositor",
     "aliases": ["keyboard", "input", "language", "layout", "input-source"],
     "allowMultiple": false,

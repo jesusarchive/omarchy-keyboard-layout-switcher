@@ -3,10 +3,9 @@ import Quickshell
 import qs.Commons
 import qs.Ui
 
-// The bar icon and the Input menu. It follows the layout of the macOS menu bar
-// item, so the menu holds the source icon, a ✓ on the active source, Emoji &
-// Symbols, Show Input Source Name and Keyboard Settings. Omarchy's panel
-// components draw all of it.
+// The bar icon and the Input menu. The menu holds the source icon, a ✓ on the
+// active source, Emoji & Symbols, Show Input Source Name and Keyboard Settings.
+// Omarchy's panel components draw all of it.
 Panel {
   id: root
   moduleName: "jesusarchive.language-switcher"
@@ -130,7 +129,7 @@ Panel {
       else root.toggle()
     }
 
-    // The pressed-in look the macOS menu bar item gets while its menu is open.
+    // The pressed-in look the bar item takes on while its menu is open.
     Rectangle {
       anchors.centerIn: parent
       width: iconRow.implicitWidth + Style.space(8)
@@ -272,7 +271,7 @@ Panel {
         x: Style.space(6)
         spacing: Style.space(6)
 
-        // ✓ column, as in the macOS menu.
+        // The ✓ column, blank on every row but the active source.
         Text {
           width: Style.space(14)
           anchors.verticalCenter: parent.verticalCenter

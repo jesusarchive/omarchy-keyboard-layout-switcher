@@ -4,8 +4,8 @@ import Quickshell.Wayland
 import qs.Commons
 import qs.Ui
 
-// The two overlays macOS shows when the input source changes:
-//  - switcher: the Control-Space list of source names, current one boxed
+// The two overlays that report an input source change:
+//  - switcher: the Ctrl+Space list of source names, current one boxed
 //  - indicator: a small badge with the new source, plus ⇪ when Caps Lock is on
 // This follows Omarchy's own overlays (emojis, clipboard, reminders). It is a
 // full-screen layer holding a centred card that draws from the [menu] surface

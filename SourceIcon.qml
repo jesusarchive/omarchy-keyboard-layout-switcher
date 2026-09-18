@@ -1,7 +1,7 @@
 import QtQuick
 import qs.Commons
 
-// The macOS input source icon. It draws a filled rounded square and knocks the
+// The input source icon. It draws a filled rounded square and knocks the
 // source's letters out of it, in the theme's colors and font.
 Item {
   id: root
@@ -18,7 +18,7 @@ Item {
   Rectangle {
     anchors.fill: parent
     // Follows the theme's rounding, but a sharp square no longer reads as
-    // the macOS glyph, so keep a small radius at least.
+    // an input source icon, so keep a small radius at least.
     radius: Math.max(Math.round(root.size * 0.2), Math.min(Style.cornerRadius, root.size * 0.3))
     color: root.fill
   }
