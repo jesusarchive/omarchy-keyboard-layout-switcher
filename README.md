@@ -6,7 +6,7 @@ menu, or switch layouts from the keyboard. Ctrl+Space goes back to the source
 you used before, and Ctrl+Alt+Space steps to the next one.
 Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
 
-![The EN badge in the Omarchy bar](assets/screenshot.png)
+![The EN badge in the bar with the Input menu open, listing English (US) and Spanish](preview.png)
 
 - The bar badge carries the layout's language code from xkb. Hover it for the
   full name ("Spanish"), or turn on "Show Input Source Name" to put the name in
@@ -168,7 +168,7 @@ Files:
 - `SourceIcon.qml`: the badge drawing
 - `Model.js`: the pure logic
 - `tests/`: the node tests
-- `assets/screenshot.png`
+- `preview.png`: the marketplace preview, also the image above
 
 ## License
 
