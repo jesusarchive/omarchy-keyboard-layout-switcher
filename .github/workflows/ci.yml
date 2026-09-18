@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Model tests
+        run: node --test tests/
+
+      # The real check is `omarchy plugin validate .`, which needs an Omarchy
+      # install. These are the parts of it that run anywhere, so a broken
+      # manifest or a stray symlink fails here rather than at submission.
+      - name: Manifest is valid JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('manifest.json','utf8'))"
+
+      - name: Manifest declares an entry point for every kind
+        run: |
+          node -e "
+            const m = JSON.parse(require('fs').readFileSync('manifest.json','utf8'))
+            for (const field of ['id','name','version','kinds','entryPoints']) {
+              if (m[field] === undefined) throw new Error('manifest is missing ' + field)
+            }
+            if (m.schemaVersion !== 1) throw new Error('schemaVersion must be 1')
+            if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(m.id) || m.id.includes('..')) {
+              throw new Error('invalid plugin id ' + m.id)
+            }
+            if (m.id.startsWith('omarchy.')) throw new Error('id uses the reserved omarchy.* namespace')
+            for (const kind of m.kinds) {
+              const key = kind === 'bar-widget' ? 'barWidget' : kind
+              const entry = m.entryPoints[key]
+              if (!entry) throw new Error('no entry point for kind ' + kind)
+              if (!require('fs').existsSync(entry)) throw new Error('missing entry point file ' + entry)
+            }
+          "
+
+      - name: No symlinks in the plugin folder
+        run: |
+          found=$(find . -path ./.git -prune -o -type l -print)
+          if [ -n "$found" ]; then echo "symlinks are not allowed:"; echo "$found"; exit 1; fi

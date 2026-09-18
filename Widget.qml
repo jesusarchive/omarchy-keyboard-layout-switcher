@@ -93,7 +93,10 @@ Panel {
       close()
     } else if (row.action === "emoji") {
       close()
-      if (bar) bar.run("omarchy-shell shell toggle omarchy.emojis")
+      // Straight to the host rather than out through `omarchy-shell`, which
+      // would spawn a login shell and a qs client to reach this same process.
+      // "{}" is the empty payload the CLI substitutes for an overlay.
+      if (bar && bar.shell) bar.shell.toggle("omarchy.emojis", "{}")
     } else if (row.action === "sourceName") {
       setShowSourceName(!showSourceName)
     } else if (row.action === "settings") {
