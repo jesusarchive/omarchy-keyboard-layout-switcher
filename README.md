@@ -94,10 +94,14 @@ Keys while the menu is open:
 | Key | Action |
 |---|---|
 | `j` / `k` / arrows | move |
-| a letter | jump to the source whose name starts with it, except `j` and `k` |
-| `Enter` | activate the selected row |
-| `Tab` | next bar panel |
+| `Enter` / `Space` | activate the selected row |
+| `Tab` / `Shift+Tab` | next or previous bar panel |
 | `Esc` | close |
+
+These come from Omarchy's shared panel key handling, so they are the same keys
+every other bar panel uses. The menu opens with the highlight hidden and the
+cursor already on the active source, so the first key press reveals it without
+moving.
 
 ### Scripting
 

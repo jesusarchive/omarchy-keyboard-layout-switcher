@@ -41,7 +41,11 @@ Panel {
     return out
   }
 
-  property int cursorIndex: -1
+  property int cursorIndex: 0
+  // Omarchy's panels keep the highlight hidden until a key asks for it, then
+  // the first press only reveals it where it already sits. Hovering a row
+  // reveals it too. Closing hides it again.
+  property bool cursorActive: false
 
   function attachService() {
     if (svc || !bar || !bar.shell || typeof bar.shell.serviceFor !== "function") return
@@ -67,7 +71,10 @@ Panel {
   }
 
   onOpenedChanged: if (opened) {
-    cursorIndex = -1
+    // Open on the active source, so the first j or k moves from where the
+    // reader is rather than from the top of the menu.
+    cursorIndex = actionable(activeIndex) ? activeIndex : 0
+    cursorActive = false
     if (svc) svc.refresh()
     Qt.callLater(function() { keyCatcher.forceActiveFocus() })
   }
@@ -79,7 +86,6 @@ Panel {
   function moveCursor(delta) {
     if (rows.length === 0) return
     var i = cursorIndex
-    if (i < 0) i = delta > 0 ? -1 : rows.length
     for (var step = 0; step < rows.length; step++) {
       i = (i + delta + rows.length) % rows.length
       if (actionable(i)) { cursorIndex = i; return }
@@ -186,29 +192,18 @@ Panel {
       id: keyCatcher
       anchors.fill: parent
 
-      onMoveRequested: function(dx, dy) { root.moveCursor(dy !== 0 ? dy : dx) }
+      // PanelKeyCatcher owns the key map, so h/j/k/l, the arrows, Enter,
+      // Space, Tab and Esc behave here exactly as in every Omarchy panel.
+      onMoveRequested: function(dx, dy) {
+        if (!root.cursorActive) { root.cursorActive = true; return }
+        root.moveCursor(dy !== 0 ? dy : dx)
+      }
       onActivateRequested: {
+        if (!root.cursorActive) { root.cursorActive = true; return }
         if (root.actionable(root.cursorIndex)) root.activate(root.rows[root.cursorIndex])
-        else root.moveCursor(1)
       }
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
-      onTextKey: function(t) {
-        if (t === "j") root.moveCursor(1)
-        else if (t === "k") root.moveCursor(-1)
-        else {
-          // Typing the first letter of a source name picks it, the way typing a
-          // menu item's name does. `j` and `k` are navigation, so they never match.
-          var lower = t.toLowerCase()
-          for (var i = 0; i < root.rows.length; i++) {
-            var row = root.rows[i]
-            if (row.kind === "source" && row.label.toLowerCase().charAt(0) === lower) {
-              root.cursorIndex = i
-              return
-            }
-          }
-        }
-      }
 
       Column {
         id: menuColumn
@@ -253,7 +248,7 @@ Panel {
       id: rowItem
       readonly property var row: parent ? parent.rowData : null
       readonly property int rowIndex: parent ? parent.rowIndex : -1
-      readonly property bool hot: root.cursorIndex === rowIndex
+      readonly property bool hot: root.cursorActive && root.cursorIndex === rowIndex
       readonly property bool checked: !!row && (row.kind === "source" ? row.index === root.activeIndex : row.checked === true)
       readonly property color textColor: hot ? Color.menu.selectedText : Color.popups.text
 
@@ -327,7 +322,10 @@ Panel {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onEntered: root.cursorIndex = rowItem.rowIndex
+        onContainsMouseChanged: if (containsMouse) {
+          root.cursorActive = true
+          root.cursorIndex = rowItem.rowIndex
+        }
         onClicked: root.activate(rowItem.row)
       }
     }
