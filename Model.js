@@ -1,4 +1,4 @@
-// Pure logic for the language switcher, kept Qt-free so node can test it.
+// Pure logic for the language switcher, with no Qt imports so node can test it.
 
 // Devices Hyprland reports as keyboards that nobody types on: fcitx5's virtual
 // keyboard and the ACPI buttons. They carry the layout list too, so reading or
@@ -49,8 +49,8 @@ function splitList(value) {
   return String(value === undefined || value === null ? "" : value).split(",")
 }
 
-// Short label for a source: xkb's language code (us → EN, es → ES, latam →
-// ES), falling back to the layout name when xkb has no brief for it.
+// The short label for a source is xkb's language code, so us becomes EN, and
+// both es and latam become ES. A layout xkb has no brief for keeps its own name.
 function shortCode(layout, variant, catalog) {
   var entry = (catalog || {})[catalogKey(layout, variant)] || (catalog || {})[layout]
   var code = entry && entry.brief ? entry.brief.split("-")[0] : String(layout || "").split("-")[0]
@@ -67,6 +67,33 @@ function sourceName(layout, variant, catalog) {
   var entry = (catalog || {})[catalogKey(layout, variant)] || (catalog || {})[layout]
   if (entry && entry.description) return entry.description
   return variant ? layout + " (" + variant + ")" : layout
+}
+
+// Two badges must never read the same. A source whose code another source
+// already holds takes a variant letter instead, so us and us(intl) become EN
+// and ENI. If another source holds that letter too, this tries the rest of the
+// variant, then the source's position in the list. This walks the list in order and
+// records every code it hands out, so rewriting one source can never produce a
+// code that another source already has.
+function disambiguate(list) {
+  var taken = {}
+  list.forEach(function (source) {
+    if (!taken[source.code]) {
+      taken[source.code] = true
+      return
+    }
+    var stem = source.code.substring(0, 2)
+    var tries = []
+    for (var i = 0; i < source.variant.length; i++) tries.push(stem + source.variant.charAt(i).toUpperCase())
+    tries.push(stem + String(source.index + 1))
+    for (var t = 0; t < tries.length; t++) {
+      if (!taken[tries[t]]) {
+        source.code = tries[t]
+        break
+      }
+    }
+    taken[source.code] = true
+  })
 }
 
 // Input sources in kb_layout order.
@@ -87,18 +114,13 @@ function sources(keyboard, catalog) {
       name: sourceName(layout, variant, catalog)
     })
   }
-  // Two sources sharing a code (us and us(intl)) get a variant hint so the
-  // badges can be told apart.
-  out.forEach(function (source) {
-    var clash = out.some(function (other) { return other !== source && other.code === source.code })
-    if (clash && source.variant) source.code = source.code.substring(0, 2) + source.variant.charAt(0).toUpperCase()
-  })
+  disambiguate(out)
   out.forEach(function (source) { source.glyph = iconGlyph(source) })
   return out
 }
 
-// The keyboard being typed on: the one the last activelayout event named, or
-// failing that the furthest-advanced one.
+// Picks the keyboard being typed on. That is the one the last activelayout
+// event named, or the furthest-advanced one when no event has named any.
 function selectKeyboard(typed, namedByEvent) {
   var keyboards = typed || []
   if (keyboards.length === 0) return null
@@ -135,7 +157,8 @@ function eventKeyboardName(data) {
   return name.indexOf("hl-virtual-keyboard") === 0 ? "" : name
 }
 
-// Most-recently-used order, newest first, limited to indices that exist.
+// Returns the most-recently-used order, newest first, dropping any index
+// that no longer exists.
 function touchRecent(recent, index, count) {
   var next = [index]
   ;(recent || []).forEach(function (i) {
@@ -144,7 +167,7 @@ function touchRecent(recent, index, count) {
   return next
 }
 
-// Control-Space: the source used before the current one.
+// Control-Space goes to the source used before the current one.
 function previousIndex(recent, active, count) {
   if (count <= 1) return active
   var list = recent || []
@@ -154,7 +177,7 @@ function previousIndex(recent, active, count) {
   return nextIndex(active, count)
 }
 
-// Control-Option-Space: the next source in order.
+// Control-Option-Space goes to the next source in order.
 function nextIndex(active, count) {
   if (count <= 1) return active
   return ((active || 0) + 1) % count
@@ -180,12 +203,14 @@ function resolveSource(sourceList, query) {
   return -1
 }
 
-// hyprctl batch that moves every typed keyboard to one layout, so a second
-// keyboard doesn't stay on the old source.
-function switchBatch(keyboards, index) {
+// One hyprctl argv per typed keyboard, so a second keyboard doesn't stay on the
+// old source. These are separate argv vectors rather than one `hyprctl --batch`
+// string. Batch splits its argument on ";" and has no quoting, so a device name
+// that held a semicolon or a space would run as a command of its own.
+function switchCommands(keyboards, index) {
   return (keyboards || []).map(function (name) {
-    return "switchxkblayout " + name + " " + index
-  }).join(" ; ")
+    return ["hyprctl", "switchxkblayout", String(name), String(index)]
+  })
 }
 
 if (typeof module !== "undefined") {
@@ -202,6 +227,6 @@ if (typeof module !== "undefined") {
     previousIndex: previousIndex,
     nextIndex: nextIndex,
     resolveSource: resolveSource,
-    switchBatch: switchBatch
+    switchCommands: switchCommands
   }
 }

@@ -50,7 +50,7 @@ test("catalog reads layouts and variants, skips models and options", () => {
   assert.strictEqual(catalog.pc105, undefined)
 })
 
-test("short codes are xkb language codes, falling back to the layout name", () => {
+test("short codes are xkb language codes, and fall back to the layout name", () => {
   assert.strictEqual(Model.shortCode("us", "", catalog), "EN")
   assert.strictEqual(Model.shortCode("es", "", catalog), "ES")
   assert.strictEqual(Model.shortCode("latam", "", catalog), "ES")
@@ -71,6 +71,28 @@ test("sources sharing a code get a variant hint", () => {
   const list = Model.sources({ layout: "us,us", variant: ",intl" }, catalog)
   assert.deepStrictEqual(list.map(s => s.code), ["EN", "ENI"])
   assert.strictEqual(list[1].name, "English (US, intl., with dead keys)")
+})
+
+test("three sources sharing a code all end up with different codes", () => {
+  const list = Model.sources({ layout: "us,us,us", variant: ",intl,dvorak" }, catalog)
+  const codes = list.map(s => s.code)
+  assert.deepStrictEqual(codes, ["EN", "ENI", "END"])
+  assert.strictEqual(new Set(codes).size, 3)
+})
+
+test("a taken variant letter moves on to the next letter of the variant", () => {
+  const codes = Model.sources({ layout: "us,us,us", variant: ",intl,intl2" }, catalog).map(s => s.code)
+  assert.deepStrictEqual(codes, ["EN", "ENI", "ENN"])
+})
+
+test("a variant with no letter left falls back to the source position", () => {
+  const codes = Model.sources({ layout: "us,us,us", variant: ",i,i" }, catalog).map(s => s.code)
+  assert.deepStrictEqual(codes, ["EN", "ENI", "EN3"])
+})
+
+test("sources with no variant to fall back on still differ", () => {
+  const codes = Model.sources({ layout: "us,us", variant: "," }, catalog).map(s => s.code)
+  assert.deepStrictEqual(codes, ["EN", "EN2"])
 })
 
 test("readDevices ignores buttons and virtual keyboards", () => {
@@ -139,6 +161,15 @@ test("resolveSource accepts an index, a code or a layout", () => {
   assert.strictEqual(Model.resolveSource(list, "fr"), -1)
 })
 
-test("switchBatch moves every keyboard", () => {
-  assert.strictEqual(Model.switchBatch(["a", "b"], 1), "switchxkblayout a 1 ; switchxkblayout b 1")
+test("switchCommands moves every keyboard with one argv each", () => {
+  assert.deepStrictEqual(Model.switchCommands(["a", "b"], 1), [
+    ["hyprctl", "switchxkblayout", "a", "1"],
+    ["hyprctl", "switchxkblayout", "b", "1"]
+  ])
+})
+
+test("switchCommands keeps a hostile device name in one argument", () => {
+  assert.deepStrictEqual(Model.switchCommands(["evil; dispatch exit"], 0), [
+    ["hyprctl", "switchxkblayout", "evil; dispatch exit", "0"]
+  ])
 })

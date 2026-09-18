@@ -6,10 +6,14 @@ import qs.Ui
 
 // The two overlays macOS shows when the input source changes:
 //  - switcher: the Control-Space list of source names, current one boxed
-//  - indicator: a small badge with the new source (and ⇪ when Caps Lock is on)
-// Built like Omarchy's own overlays (emojis, clipboard, reminders): a
-// full-screen layer on the focused output with a centred card that uses the
-// [menu] surface tokens. No scrim and no input, since it only reports.
+//  - indicator: a small badge with the new source, plus ⇪ when Caps Lock is on
+// This follows Omarchy's own overlays (emojis, clipboard, reminders). It is a
+// full-screen layer holding a centred card that draws from the [menu] surface
+// tokens. There is no scrim and no input, because the card only reports.
+//
+// The layer has no screen binding, so Quickshell places it on one output and
+// leaves it there. Omarchy's OSD does the same. Bind `screen` here if the card
+// should ever follow the focused monitor the way the Input menu does.
 Item {
   id: root
 
@@ -62,7 +66,8 @@ Item {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
     exclusionMode: ExclusionMode.Ignore
-    // Report-only surface: never take clicks from what's underneath.
+    // The card only reports, so it must never take a click from the window
+    // underneath it.
     mask: Region {}
 
     BorderSurface {

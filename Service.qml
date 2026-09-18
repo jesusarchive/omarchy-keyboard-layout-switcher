@@ -4,18 +4,18 @@ import Quickshell.Io
 import Quickshell.Hyprland
 import "Model.js" as Model
 
-// One instance for the whole shell. Owns the layout state, the switching,
+// One instance for the whole shell. It owns the layout state, the switching,
 // the IPC target the key bindings call, and the switch overlays. The bar
-// widget (one per monitor) only renders what this exposes.
+// widget, one per monitor, only renders what this exposes.
 Item {
   id: root
 
   readonly property string pluginId: "jesusarchive.language-switcher"
 
-  // Host injection.
+  // The host fills these in.
   property var shell: null
   property var manifest: null
-  // Pushed by the bar widget from its shell.json entry.
+  // The bar widget pushes these across from its shell.json entry.
   property var settings: ({})
 
   property var sources: []
@@ -34,7 +34,8 @@ Item {
   property var _catalog: ({})
   property string _typedKeyboardName: ""
   property bool _refreshPending: false
-  // Where the switcher started, so a run of presses commits one MRU entry.
+  // Where the switcher started, so a run of presses adds one
+  // most-recently-used entry rather than one per press.
   property int _switcherOrigin: -1
   property var _menuHosts: []
 
@@ -79,11 +80,15 @@ Item {
 
   // -------------------------------------------------------------- switching
 
+  // Detached argv rather than a Process. A Process that is already running
+  // can't be re-run, so Quickshell would discard a second Ctrl+Space that
+  // arrived inside the first switch. activeIndex has already moved by then, so
+  // the badge would name a layout nobody is on.
   function switchTo(index) {
     if (index < 0 || index >= sources.length || keyboards.length === 0) return false
     if (index !== activeIndex) {
-      switchProc.command = ["hyprctl", "--batch", Model.switchBatch(keyboards, index)]
-      switchProc.running = true
+      var commands = Model.switchCommands(keyboards, index)
+      for (var i = 0; i < commands.length; i++) Quickshell.execDetached(commands[i])
       activeIndex = index
       switchGuard.restart()
     }
@@ -108,14 +113,14 @@ Item {
     return activeSource ? activeSource.code : ""
   }
 
-  // Control-Option-Space: next source, with the small indicator.
+  // Control-Option-Space moves to the next source and shows the small indicator.
   function next() {
     if (sources.length < 2) return "single"
     select(Model.nextIndex(activeIndex, sources.length))
     return activeSource ? activeSource.code : ""
   }
 
-  // A direct pick (menu, IPC, right click).
+  // Handles a direct pick from the menu, the IPC target or a right click.
   function select(index) {
     if (!switchTo(index)) return false
     recent = Model.touchRecent(recent, index, sources.length)
@@ -159,7 +164,8 @@ Item {
     function onRawEvent(event) {
       if (!event || !event.name) return
       var name = String(event.name)
-      if (name === "activelayout") {
+      // activelayout and the newer activelayoutv2 both name the keyboard first.
+      if (name.indexOf("activelayout") === 0) {
         var named = Model.eventKeyboardName(event.data)
         if (named) root._typedKeyboardName = named
         root.refresh()
@@ -190,8 +196,8 @@ Item {
     function refresh(): string { root.refresh(); return "ok" }
   }
 
-  // xkb's own names for every layout ("es" → Spanish). Only changes when the
-  // xkb data package is upgraded, so read it once.
+  // xkb's own names for every layout, so "es" gives "Spanish". This only
+  // changes when the xkb data package gets an upgrade, so read it once.
   Process {
     id: catalogProc
     command: ["xkbcli", "list", "--load-exotic"]
@@ -209,12 +215,44 @@ Item {
       waitForEnd: true
       onStreamFinished: root.applyDevices(text)
     }
-    onRunningChanged: if (!running && root._refreshPending) root.refresh()
+    onRunningChanged: {
+      if (running) {
+        stallTimer.restart()
+        return
+      }
+      stallTimer.stop()
+      if (root._refreshPending) root.refresh()
+    }
   }
 
-  Process {
-    id: switchProc
-    command: []
+  // A reading that never comes back would freeze the badge until the shell
+  // restarts, since a Process that is already running can't be re-run. Drop one
+  // that overstays so the next refresh gets through, then ask again. The
+  // reading it never delivered may have been the only one due.
+  Timer {
+    id: stallTimer
+    interval: 5000
+    onTriggered: {
+      devicesProc.running = false
+      retryTimer.restart()
+    }
+  }
+
+  Timer {
+    id: retryTimer
+    interval: 600
+    onTriggered: root.refresh()
+  }
+
+  // Plugging a keyboard in raises no Hyprland event, so a stale list would
+  // leave that keyboard on the old layout whichever way the switch runs. Poll
+  // whenever switching is possible at all. A single-layout install has nothing
+  // to switch, so it skips the poll rather than spawning hyprctl forever.
+  Timer {
+    interval: 10000
+    repeat: true
+    running: !root.loaded || root.sources.length > 1
+    onTriggered: root.refresh()
   }
 
   Timer {

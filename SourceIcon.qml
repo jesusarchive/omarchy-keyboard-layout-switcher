@@ -1,8 +1,8 @@
 import QtQuick
 import qs.Commons
 
-// macOS input source icon, a filled rounded square with the source's letters
-// knocked out, drawn in the theme's colours and font.
+// The macOS input source icon. It draws a filled rounded square and knocks the
+// source's letters out of it, in the theme's colors and font.
 Item {
   id: root
 

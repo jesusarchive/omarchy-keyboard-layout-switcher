@@ -3,9 +3,10 @@ import Quickshell
 import qs.Commons
 import qs.Ui
 
-// Bar icon plus the Input menu. Structured like the macOS menu bar item
-// (source icon, ✓ on the active source, Emoji & Symbols, Show Input Source
-// Name, Keyboard Settings) and drawn with Omarchy's panel components.
+// The bar icon and the Input menu. It follows the layout of the macOS menu bar
+// item, so the menu holds the source icon, a ✓ on the active source, Emoji &
+// Symbols, Show Input Source Name and Keyboard Settings. Omarchy's panel
+// components draw all of it.
 Panel {
   id: root
   moduleName: "jesusarchive.language-switcher"
@@ -27,7 +28,7 @@ Panel {
   readonly property color foreground: bar ? bar.foreground : Color.foreground
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
 
-  // Menu rows in display order. Separators are skipped by keyboard navigation.
+  // Menu rows in display order. Keyboard navigation steps over the separators.
   readonly property var rows: {
     var out = sources.map(function(s) {
       return { kind: "source", index: s.index, label: s.name, glyph: s.glyph }
@@ -57,8 +58,8 @@ Panel {
   Component.onCompleted: attachService()
   Component.onDestruction: if (svc) svc.unregisterMenuHost(root)
 
-  // The service loads alongside the widget and is rebuilt on plugin reload,
-  // so look for it until it's there (a destroyed one reads back as null).
+  // The service loads alongside the widget, and a plugin reload rebuilds it,
+  // so keep looking until it answers. A destroyed one reads back as null.
   Timer {
     interval: 400
     repeat: true
@@ -194,7 +195,8 @@ Panel {
         if (t === "j") root.moveCursor(1)
         else if (t === "k") root.moveCursor(-1)
         else {
-          // Typing a source's code picks it, like typing a menu item's name.
+          // Typing the first letter of a source name picks it, the way typing a
+          // menu item's name does. `j` and `k` are navigation, so they never match.
           var lower = t.toLowerCase()
           for (var i = 0; i < root.rows.length; i++) {
             var row = root.rows[i]
