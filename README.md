@@ -153,7 +153,7 @@ in Omarchy's settings panel:
 ## Development
 
 ```bash
-node --test tests/                        # model tests
+node --test tests/*.test.js               # model tests
 omarchy plugin validate .                 # manifest check
 rsync -a --delete --exclude .git ./ ~/.config/omarchy/plugins/jesusarchive.language-switcher/
 omarchy restart shell                     # QML changes need a restart to show up

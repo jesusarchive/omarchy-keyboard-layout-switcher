@@ -13,10 +13,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 'lts/*'
 
+      # Name the files rather than the folder. Passing a directory to --test
+      # only works on newer Node, and the runner's LTS treats it as a module
+      # path and fails to resolve it.
       - name: Model tests
-        run: node --test tests/
+        run: node --test tests/*.test.js
 
       # The real check is `omarchy plugin validate .`, which needs an Omarchy
       # install. These are the parts of it that run anywhere, so a broken
