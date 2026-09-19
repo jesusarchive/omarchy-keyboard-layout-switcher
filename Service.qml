@@ -15,9 +15,6 @@ Item {
   // The host fills these in.
   property var shell: null
   property var manifest: null
-  // The bar widget pushes these across from its shell.json entry.
-  property var settings: ({})
-
   property var sources: []
   property int activeIndex: 0
   property var keyboards: []
@@ -26,11 +23,6 @@ Item {
 
   readonly property var activeSource: sources.length > 0 ? sources[Math.max(0, Math.min(activeIndex, sources.length - 1))] : null
 
-  readonly property bool showSwitcher: setting("showSwitcher", true) !== false
-  readonly property bool holdToCycle: setting("holdToCycle", true) !== false
-  readonly property int switcherDelayMs: intSetting("switcherDelayMs", 250, 0, 1000)
-  readonly property int hudTimeoutMs: intSetting("hudTimeoutMs", 900, 300, 5000)
-
   property var _catalog: ({})
   property string _typedKeyboardName: ""
   property bool _refreshPending: false
@@ -38,17 +30,6 @@ Item {
   // most-recently-used entry rather than one per press.
   property int _switcherOrigin: -1
   property var _menuHosts: []
-
-  function setting(name, fallback) {
-    var value = settings ? settings[name] : undefined
-    return value === undefined || value === null ? fallback : value
-  }
-
-  function intSetting(name, fallback, min, max) {
-    var n = parseInt(String(setting(name, fallback)), 10)
-    if (!isFinite(n)) n = fallback
-    return Math.max(min, Math.min(max, n))
-  }
 
   // ---------------------------------------------------------------- reading
 
@@ -116,8 +97,7 @@ Item {
       target = Model.previousIndex(recent, activeIndex, sources.length)
     }
     switchTo(target)
-    if (showSwitcher) hud.show()
-    else commitSwitcher()
+    hud.show()
     return activeSource ? activeSource.code : ""
   }
 
@@ -286,8 +266,6 @@ Item {
   SwitchHud {
     id: hud
     service: root
-    holdToCycle: root.holdToCycle
-    switcherDelayMs: root.switcherDelayMs
     onSwitcherClosed: root.commitSwitcher()
     onAdvanceRequested: root.advance()
   }

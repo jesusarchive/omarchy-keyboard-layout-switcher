@@ -35,10 +35,11 @@ Item {
   // Ctrl+Space on its own switches in silence.
   property bool revealed: false
 
-  // Turned off by `holdToCycle`, which falls the whole thing back to the timer.
-  property bool holdToCycle: true
-  property int switcherDelayMs: 250
-  readonly property bool grabbing: opened && holdToCycle
+  // How long the keyboard has to stay down before the card is worth drawing.
+  // Shorter than this and the reader is going back to the last source, not
+  // reading a list.
+  readonly property int switcherDelayMs: 250
+  readonly property bool grabbing: opened
   // When a key last reached the card, as milliseconds since the epoch. The
   // service reads it to tell its own duplicate from a real press: a bind that
   // fires for the same Space lands a shell and a qs client later, so it is the
@@ -102,9 +103,7 @@ Item {
   function show() {
     if (!opened) { targetScreen = focusedScreen(); lastKeyAt = 0 }
     opened = true
-    if (!grabbing || switcherDelayMs <= 0) reveal()
-    else if (!revealed) revealTimer.restart()
-    hideTimer.interval = grabbing ? grabIdleMs : service.hudTimeoutMs
+    if (!revealed) revealTimer.restart()
     hideTimer.restart()
   }
 
@@ -123,6 +122,7 @@ Item {
 
   Timer {
     id: hideTimer
+    interval: root.grabIdleMs
     onTriggered: root.close()
   }
 

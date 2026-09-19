@@ -4,8 +4,8 @@ import qs.Commons
 import qs.Ui
 
 // The bar icon and the Input menu. The menu holds the source icon, a ✓ on the
-// active source, Emoji & Symbols, Show Input Source Name and Keyboard Settings.
-// Omarchy's panel components draw all of it.
+// active source, Emoji & Symbols and Keyboard Settings. Omarchy's panel
+// components draw all of it.
 Panel {
   id: root
   moduleName: "jesusarchive.language-switcher"
@@ -17,8 +17,6 @@ Panel {
   readonly property var sources: svc ? svc.sources : []
   readonly property int activeIndex: svc ? svc.activeIndex : 0
   readonly property var activeSource: svc ? svc.activeSource : null
-  readonly property bool hideWhenSingle: setting("hideWhenSingle", false) === true
-  readonly property bool showSourceName: setting("showSourceName", false) === true
   readonly property string screenName: {
     var win = button.QsWindow.window
     return win && win.screen ? String(win.screen.name) : ""
@@ -35,8 +33,6 @@ Panel {
     out.push({ kind: "separator" })
     out.push({ kind: "action", action: "emoji", label: "Show Emoji & Symbols", icon: "" })
     out.push({ kind: "separator" })
-    out.push({ kind: "action", action: "sourceName", label: "Show Input Source Name", checked: showSourceName })
-    out.push({ kind: "separator" })
     out.push({ kind: "action", action: "settings", label: "Open Keyboard Settings…" })
     return out
   }
@@ -52,11 +48,9 @@ Panel {
     var found = bar.shell.serviceFor(pluginId)
     if (!found) return
     svc = found
-    svc.settings = root.settings
     svc.registerMenuHost(root)
   }
 
-  onSettingsChanged: if (svc) svc.settings = settings
   onBarChanged: attachService()
   Component.onCompleted: attachService()
   Component.onDestruction: if (svc) svc.unregisterMenuHost(root)
@@ -103,23 +97,13 @@ Panel {
       // would spawn a login shell and a qs client to reach this same process.
       // "{}" is the empty payload the CLI substitutes for an overlay.
       if (bar && bar.shell) bar.shell.toggle("omarchy.emojis", "{}")
-    } else if (row.action === "sourceName") {
-      setShowSourceName(!showSourceName)
     } else if (row.action === "settings") {
       close()
       if (bar) bar.run("omarchy-launch-editor " + Util.shellQuote(Quickshell.env("HOME") + "/.config/hypr/input.lua"))
     }
   }
 
-  function setShowSourceName(value) {
-    if (!bar || !bar.shell || typeof bar.shell.updateEntryInline !== "function") return
-    var next = {}
-    for (var k in settings) next[k] = settings[k]
-    next.showSourceName = value
-    bar.shell.updateEntryInline(pluginId, next)
-  }
-
-  visible: svc !== null && sources.length > (hideWhenSingle ? 1 : 0)
+  visible: svc !== null && sources.length > 0
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
@@ -161,16 +145,6 @@ Panel {
         fill: root.foreground
         ink: root.bar && !root.bar.transparent ? root.bar.background : Color.background
         fontFamily: root.fontFamily
-      }
-
-      Text {
-        visible: root.showSourceName && root.activeSource !== null
-        anchors.verticalCenter: parent.verticalCenter
-        textFormat: Text.PlainText
-        text: root.activeSource ? root.activeSource.name : ""
-        color: root.foreground
-        font.family: root.fontFamily
-        font.pixelSize: Style.font.body
       }
     }
   }
@@ -249,7 +223,7 @@ Panel {
       readonly property var row: parent ? parent.rowData : null
       readonly property int rowIndex: parent ? parent.rowIndex : -1
       readonly property bool hot: root.cursorActive && root.cursorIndex === rowIndex
-      readonly property bool checked: !!row && (row.kind === "source" ? row.index === root.activeIndex : row.checked === true)
+      readonly property bool checked: !!row && row.kind === "source" && row.index === root.activeIndex
       readonly property color textColor: hot ? Color.menu.selectedText : Color.popups.text
 
       implicitHeight: Style.space(28)

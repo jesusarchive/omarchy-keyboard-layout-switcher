@@ -9,11 +9,10 @@ Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
 ![The EN badge in the bar with the Input menu open, listing English (US) and Spanish](preview.png)
 
 - The bar badge carries the layout's language code from xkb. Hover it for the
-  full name ("Spanish"), or turn on "Show Input Source Name" to put the name in
-  the bar as well.
+  full name ("Spanish").
 - The Input menu lists every source with a ✓ on the active one, then "Show
-  Emoji & Symbols" (Omarchy's emoji picker), "Show Input Source Name" and "Open
-  Keyboard Settings…" (`~/.config/hypr/input.lua`).
+  Emoji & Symbols" (Omarchy's emoji picker) and "Open Keyboard Settings…"
+  (`~/.config/hypr/input.lua`).
 - Ctrl+Space on its own switches to the most recently used source and shows
   nothing. Keep Ctrl down instead and the switcher appears, listing every
   source. Tap Space with Ctrl still down to walk the list, and let go to settle
@@ -55,8 +54,7 @@ kb_layout = "us,es",
 kb_variant = ",",
 ```
 
-With a single layout the badge still shows, and switching does nothing. Turn on
-`hideWhenSingle` to hide the badge instead.
+With a single layout the badge still shows, and switching does nothing.
 
 ### Keybindings
 
@@ -132,20 +130,6 @@ omarchy-shell jesusarchive.language-switcher refresh
 `previous` and `next` print the new code, or `single` when there's only one
 source. `set` prints `unknown` for a source that doesn't exist.
 
-## Settings
-
-Edit these inline on the widget's entry in `~/.config/omarchy/shell.json`, or
-in Omarchy's settings panel:
-
-| Key | Default | Meaning |
-|---|---|---|
-| `showSourceName` | `false` | Show the layout name next to the badge |
-| `showSwitcher` | `true` | Show the source list on Ctrl+Space. Turn it off to switch with no overlay at all |
-| `holdToCycle` | `true` | Keep the switcher up while the modifier is held, and close when you let go. Turn it off to close on `hudTimeoutMs` instead |
-| `switcherDelayMs` | `250` | How long to hold before the switcher appears. A quicker Ctrl+Space shows nothing. `0` shows it straight away |
-| `hudTimeoutMs` | `900` | How long the switcher stays up with `holdToCycle` off (300 to 5000 ms) |
-| `hideWhenSingle` | `false` | Hide the badge when you have only one layout |
-
 ## How it works
 
 - `Service.qml` runs once for the whole shell. It reads `hyprctl -j devices`
@@ -168,12 +152,13 @@ in Omarchy's settings panel:
 - A Ctrl+Space takes the keyboard straight away and draws nothing. That grab is
   the only way to learn that the modifier came back up, because a Hyprland
   binding reports the press and never the release. A release inside
-  `switcherDelayMs` ends the run having shown nothing, and the switch has
+  a quarter of a second ends the run having shown nothing, and the switch has
   already happened. Past that, the switcher appears.
 - While it is up, Space reaches the switcher directly and the switcher walks the
   list, so a binding that fires for the same press is dropped. If the grab never
-  takes, the binding drives the list as before and the switcher closes on a
-  timeout. Any key that is not Space hands the keyboard straight back.
+  takes, the binding drives the list as before and the switcher closes after
+  five seconds of silence. Any key that is not Space hands the keyboard
+  straight back.
 - `Widget.qml` is the bar badge and menu, one per monitor. It only renders what
   the service exposes.
 - `Model.js` holds the parsing and switching logic with no Qt imports, so node
