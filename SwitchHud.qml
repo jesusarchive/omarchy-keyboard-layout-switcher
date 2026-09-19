@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.Commons
 import qs.Ui
@@ -12,9 +13,10 @@ import qs.Ui
 // full-screen layer holding a centred card that draws from the [menu] surface
 // tokens. There is no scrim and no input, because the card only reports.
 //
-// The layer has no screen binding, so Quickshell places it on one output and
-// leaves it there. Omarchy's OSD does the same. Bind `screen` here if the card
-// should ever follow the focused monitor the way the Input menu does.
+// The card lands on the monitor that has focus, the same one `toggleMenu`
+// opens the Input menu on. Omarchy's OSD leaves this unbound and stays put,
+// which on two monitors means reading a switch on the screen you are not
+// typing on.
 Item {
   id: root
 
@@ -23,6 +25,20 @@ Item {
   property string mode: ""
   property bool opened: false
   readonly property bool switcherOpen: opened && mode === "switcher"
+
+  // The output the card sits on. Captured when it opens rather than bound to
+  // the focused monitor, so moving focus mid-switch cannot make a card that is
+  // already on screen jump to another monitor.
+  property var targetScreen: null
+
+  function focusedScreen() {
+    var wanted = Hyprland.focusedMonitor ? String(Hyprland.focusedMonitor.name) : ""
+    var list = Quickshell.screens
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].name) === wanted) return list[i]
+    }
+    return list.length > 0 ? list[0] : null
+  }
 
   // Same tokens as the Omarchy menu, so themes that style it style this.
   property color background: Color.menu.background
@@ -38,8 +54,13 @@ Item {
 
   signal switcherClosed()
 
+  // Assigned, not bound. A binding on focusedScreen() would follow the focused
+  // monitor and move a card that is already up.
+  Component.onCompleted: targetScreen = focusedScreen()
+
   function show(nextMode) {
     if (opened && mode !== nextMode && mode === "switcher") switcherClosed()
+    if (!opened) targetScreen = focusedScreen()
     mode = nextMode
     opened = true
     hideTimer.interval = service.hudTimeoutMs
@@ -61,6 +82,7 @@ Item {
   PanelWindow {
     id: panel
     visible: root.opened || card.opacity > 0
+    screen: root.targetScreen ? root.targetScreen : (Quickshell.screens.length > 0 ? Quickshell.screens[0] : null)
     anchors { top: true; bottom: true; left: true; right: true }
     color: "transparent"
     WlrLayershell.namespace: "jesusarchive-language-switcher"

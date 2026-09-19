@@ -140,6 +140,9 @@ in Omarchy's settings panel:
 - `Service.qml` runs once for the whole shell. It reads `hyprctl -j devices`
   on start and on every `activelayout` and `configreloaded` event from
   Hyprland, owns the IPC target, and draws the overlays in `SwitchHud.qml`.
+  Both overlays open on the monitor that has focus, and stay on it until they
+  close, so moving focus mid-switch cannot make a card that is already up jump
+  to another screen.
 - Switching runs one detached `hyprctl switchxkblayout <keyboard> <index>` per
   typed keyboard. Each device name goes in its own argument, so no shell or
   batch separator can split it.
