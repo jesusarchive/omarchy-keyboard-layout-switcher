@@ -2,7 +2,8 @@
 
 An input source menu for the [Omarchy](https://omarchy.org) bar. The bar shows
 the active keyboard layout as a small badge (`EN`, `ES`). Click it for the Input
-menu, or bind Ctrl+Space to go straight back to the source you used before.
+menu, or bind Ctrl+Space to go straight back to the source you used before and
+Ctrl+Alt+Space to step forward through them.
 Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
 
 ![The EN badge in the bar with the Input menu open, listing English (US) and Spanish](preview.png)
@@ -18,6 +19,7 @@ Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
   list. Each press restarts the `hudTimeoutMs` window, 900 ms by default, so a
   run ends when you stop pressing. Holding Ctrl down does not extend it, because
   Hyprland reports the press and never the release.
+- Ctrl+Alt+Space steps to the next source in order and shows nothing.
 - Every keyboard switches together, so a second keyboard never stays on the old
   layout. The plugin ignores virtual keyboards and ACPI buttons.
 - The badge, the menu and the switcher use Omarchy's menu colors and fonts.
@@ -59,22 +61,29 @@ With a single layout the badge still shows, and switching does nothing. Turn on
 
 ### Keybindings
 
-The plugin doesn't bind any keys. Add this line to
+The plugin doesn't bind any keys. Add these two lines to
 `~/.config/hypr/bindings.lua`:
 
 ```lua
 o.bind("CTRL + SPACE", "Previous input source", "omarchy-shell jesusarchive.language-switcher previous")
+o.bind("CTRL + ALT + SPACE", "Next input source", "omarchy-shell jesusarchive.language-switcher next")
 ```
 
-Hyprland reloads the file on save, and the binding shows up in Omarchy's
-keybindings list (Super+K). Omarchy leaves Ctrl+Space free, but apps that use
-it, editor completion for example, stop receiving it.
-To use another key, change the first argument, for example `"SUPER + SPACE"`. If
-Omarchy or another plugin already binds that chord, add `hl.unbind("SUPER + SPACE")`
-on the line before, then check with `hyprctl configerrors`.
+| Chord | Action |
+|---|---|
+| Ctrl+Space | go back to the source you used before, and show the switcher |
+| Ctrl+Space again while the switcher is up | move down the list |
+| Ctrl+Alt+Space | step to the next source in order, with no switcher |
 
-Bind `next` the same way if you want a chord that steps forward through the
-sources instead of toggling between the last two.
+Hyprland reloads the file on save, and both bindings show up in Omarchy's
+keybindings list (Super+K). Omarchy claims neither chord. It uses Super+Space
+for its own menu, so nothing needs unbinding first. Apps that want Ctrl+Space,
+editor completion for example, stop receiving it.
+
+To use other keys, change the first argument, for example `"SUPER + SPACE"`. If
+Omarchy or another plugin already binds the chord you pick, add
+`hl.unbind("SUPER + SPACE")` on the line before, then check with
+`hyprctl configerrors`.
 
 ### Remove
 
