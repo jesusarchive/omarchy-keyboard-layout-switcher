@@ -121,6 +121,25 @@ test("selectKeyboard prefers the keyboard the event named", () => {
   assert.strictEqual(Model.selectKeyboard([], ""), null)
 })
 
+test("selectKeyboard falls back to the device Hyprland marks main", () => {
+  // A ThinkPad reports the headphone jack and the extra-button row as keyboards
+  // carrying the same layout list. Without `main`, the furthest-advanced index
+  // lets one of those answer for the keyboard.
+  const typed = [
+    { name: "sof-hda-dsp-headphone", active_layout_index: 1, main: false },
+    { name: "at-translated-set-2-keyboard", active_layout_index: 0, main: true }
+  ]
+  assert.strictEqual(Model.selectKeyboard(typed, "").name, "at-translated-set-2-keyboard")
+})
+
+test("selectKeyboard puts the named keyboard ahead of the main one", () => {
+  const typed = [
+    { name: "usb-keyboard", active_layout_index: 0, main: false },
+    { name: "at-translated-set-2-keyboard", active_layout_index: 0, main: true }
+  ]
+  assert.strictEqual(Model.selectKeyboard(typed, "usb-keyboard").name, "usb-keyboard")
+})
+
 test("eventKeyboardName splits once and drops the fcitx5 keyboard", () => {
   assert.strictEqual(Model.eventKeyboardName("kbd,English (US, intl., with dead keys)"), "kbd")
   assert.strictEqual(Model.eventKeyboardName("hl-virtual-keyboard-fcitx5,English (US)"), "")

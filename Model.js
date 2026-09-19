@@ -119,14 +119,21 @@ function sources(keyboard, catalog) {
   return out
 }
 
-// Picks the keyboard being typed on. That is the one the last activelayout
-// event named, or the furthest-advanced one when no event has named any.
+// Picks the keyboard being typed on, in order of how much the answer is worth
+// trusting. The one the last activelayout event named knows it just changed.
+// Failing that, Hyprland marks one device `main`, which is the one it routes
+// typing to. The furthest-advanced reading is the last resort, and it is a
+// guess: a laptop reports several devices carrying the same layout list, so
+// without `main` a headphone jack or a row of extra buttons can answer for the
+// keyboard.
 function selectKeyboard(typed, namedByEvent) {
   var keyboards = typed || []
   if (keyboards.length === 0) return null
-  return keyboards.find(function (k) { return k.name === namedByEvent }) || keyboards.reduce(function (best, k) {
-    return (k.active_layout_index || 0) > (best.active_layout_index || 0) ? k : best
-  }, keyboards[0])
+  return keyboards.find(function (k) { return k.name === namedByEvent })
+    || keyboards.find(function (k) { return k.main === true })
+    || keyboards.reduce(function (best, k) {
+      return (k.active_layout_index || 0) > (best.active_layout_index || 0) ? k : best
+    }, keyboards[0])
 }
 
 // Everything the service needs from one `hyprctl -j devices` reading.
