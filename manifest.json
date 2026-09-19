@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "jesusarchive.language-switcher",
-  "name": "Language Switcher",
+  "id": "jesusarchive.keyboard-layout-switcher",
+  "name": "Keyboard Layout Switcher",
   "version": "0.1.0",
   "author": "jesusarchive",
   "license": "MIT",
@@ -12,7 +12,7 @@
     "service": "Service.qml"
   },
   "barWidget": {
-    "displayName": "Language Switcher",
+    "displayName": "Keyboard Layout Switcher",
     "description": "Shows the active keyboard layout as an input source icon. Click for the Input menu, or bind Ctrl+Space for the last source and Ctrl+Alt+Space for the next one.",
     "category": "Compositor",
     "aliases": ["keyboard", "input", "language", "layout", "input-source"],

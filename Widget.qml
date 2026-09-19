@@ -8,10 +8,10 @@ import qs.Ui
 // components draw all of it.
 Panel {
   id: root
-  moduleName: "jesusarchive.language-switcher"
+  moduleName: "jesusarchive.keyboard-layout-switcher"
   manageIpc: false
 
-  readonly property string pluginId: "jesusarchive.language-switcher"
+  readonly property string pluginId: "jesusarchive.keyboard-layout-switcher"
 
   property QtObject svc: null
   readonly property var sources: svc ? svc.sources : []

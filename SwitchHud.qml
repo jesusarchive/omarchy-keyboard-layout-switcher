@@ -138,7 +138,7 @@ Item {
     screen: root.targetScreen ? root.targetScreen : (Quickshell.screens.length > 0 ? Quickshell.screens[0] : null)
     anchors { top: true; bottom: true; left: true; right: true }
     color: "transparent"
-    WlrLayershell.namespace: "jesusarchive-language-switcher"
+    WlrLayershell.namespace: "jesusarchive-keyboard-layout-switcher"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: root.grabbing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     exclusionMode: ExclusionMode.Ignore

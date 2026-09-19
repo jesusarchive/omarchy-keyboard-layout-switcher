@@ -1,10 +1,10 @@
-# Language Switcher for Omarchy
+# Keyboard Layout Switcher for Omarchy
 
 An input source menu for the [Omarchy](https://omarchy.org) bar. The bar shows
 the active keyboard layout as a small badge (`EN`, `ES`). Click it for the Input
 menu, or bind Ctrl+Space to go straight back to the source you used before and
 Ctrl+Alt+Space to step forward through them.
-Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
+Plugin ID: `jesusarchive.keyboard-layout-switcher`. MIT licensed.
 
 ![The EN badge in the bar with the Input menu open, listing English (US) and Spanish](preview.png)
 
@@ -27,19 +27,19 @@ Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
 ## Install
 
 ```bash
-omarchy plugin add https://github.com/jesusarchive/omarchy-language-switcher.git --enable
+omarchy plugin add https://github.com/jesusarchive/omarchy-keyboard-layout-switcher.git --enable
 ```
 
 The widget lands in the right section of the bar. Move it with
-`omarchy bar move jesusarchive.language-switcher --section <left|center|right>`.
+`omarchy bar move jesusarchive.keyboard-layout-switcher --section <left|center|right>`.
 
 Manual install from a checkout:
 
 ```bash
 omarchy plugin validate .
-mkdir -p ~/.config/omarchy/plugins/jesusarchive.language-switcher
-rsync -a --delete --exclude .git ./ ~/.config/omarchy/plugins/jesusarchive.language-switcher/
-omarchy plugin enable jesusarchive.language-switcher
+mkdir -p ~/.config/omarchy/plugins/jesusarchive.keyboard-layout-switcher
+rsync -a --delete --exclude .git ./ ~/.config/omarchy/plugins/jesusarchive.keyboard-layout-switcher/
+omarchy plugin enable jesusarchive.keyboard-layout-switcher
 ```
 
 Requirements: `hyprctl` and `xkbcli` (libxkbcommon). Both ship with Omarchy.
@@ -62,8 +62,8 @@ The plugin doesn't bind any keys. Add these two lines to
 `~/.config/hypr/bindings.lua`:
 
 ```lua
-o.bind("CTRL + SPACE", "Previous input source", "omarchy-shell jesusarchive.language-switcher previous")
-o.bind("CTRL + ALT + SPACE", "Next input source", "omarchy-shell jesusarchive.language-switcher next")
+o.bind("CTRL + SPACE", "Previous input source", "omarchy-shell jesusarchive.keyboard-layout-switcher previous")
+o.bind("CTRL + ALT + SPACE", "Next input source", "omarchy-shell jesusarchive.keyboard-layout-switcher next")
 ```
 
 | Chord | Action |
@@ -87,7 +87,7 @@ Omarchy or another plugin already binds the chord you pick, add
 ### Remove
 
 ```bash
-omarchy plugin remove jesusarchive.language-switcher
+omarchy plugin remove jesusarchive.keyboard-layout-switcher
 ```
 
 Then delete the binding from `bindings.lua`.
@@ -118,13 +118,13 @@ moving.
 The plugin registers an IPC target:
 
 ```bash
-omarchy-shell jesusarchive.language-switcher previous   # the source used before this one
-omarchy-shell jesusarchive.language-switcher next       # the next source in order
-omarchy-shell jesusarchive.language-switcher set es     # by index, code (ES) or layout (es, us(intl))
-omarchy-shell jesusarchive.language-switcher current    # prints the active code, e.g. EN
-omarchy-shell jesusarchive.language-switcher list       # JSON of every source
-omarchy-shell jesusarchive.language-switcher toggle     # open the menu on the focused monitor
-omarchy-shell jesusarchive.language-switcher refresh
+omarchy-shell jesusarchive.keyboard-layout-switcher previous   # the source used before this one
+omarchy-shell jesusarchive.keyboard-layout-switcher next       # the next source in order
+omarchy-shell jesusarchive.keyboard-layout-switcher set es     # by index, code (ES) or layout (es, us(intl))
+omarchy-shell jesusarchive.keyboard-layout-switcher current    # prints the active code, e.g. EN
+omarchy-shell jesusarchive.keyboard-layout-switcher list       # JSON of every source
+omarchy-shell jesusarchive.keyboard-layout-switcher toggle     # open the menu on the focused monitor
+omarchy-shell jesusarchive.keyboard-layout-switcher refresh
 ```
 
 `previous` and `next` print the new code, or `single` when there's only one
@@ -169,9 +169,9 @@ source. `set` prints `unknown` for a source that doesn't exist.
 ```bash
 node --test tests/*.test.js               # model tests
 omarchy plugin validate .                 # manifest check
-rsync -a --delete --exclude .git ./ ~/.config/omarchy/plugins/jesusarchive.language-switcher/
+rsync -a --delete --exclude .git ./ ~/.config/omarchy/plugins/jesusarchive.keyboard-layout-switcher/
 omarchy restart shell                     # QML changes need a restart to show up
-omarchy-shell jesusarchive.language-switcher list
+omarchy-shell jesusarchive.keyboard-layout-switcher list
 ```
 
 Files:

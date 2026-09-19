@@ -10,7 +10,7 @@ import "Model.js" as Model
 Item {
   id: root
 
-  readonly property string pluginId: "jesusarchive.language-switcher"
+  readonly property string pluginId: "jesusarchive.keyboard-layout-switcher"
 
   // The host fills these in.
   property var shell: null

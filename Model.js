@@ -1,4 +1,4 @@
-// Pure logic for the language switcher, with no Qt imports so node can test it.
+// Pure logic for the keyboard layout switcher, with no Qt imports so node can test it.
 
 // Devices Hyprland reports as keyboards that nobody types on: fcitx5's virtual
 // keyboard and the ACPI buttons. They carry the layout list too, so reading or
