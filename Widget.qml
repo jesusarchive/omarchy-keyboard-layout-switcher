@@ -93,10 +93,12 @@ Panel {
       close()
     } else if (row.action === "emoji") {
       close()
-      // Straight to the host rather than out through `omarchy-shell`, which
-      // would spawn a login shell and a qs client to reach this same process.
-      // "{}" is the empty payload the CLI substitutes for an overlay.
-      if (bar && bar.shell) bar.shell.toggle("omarchy.emojis", "{}")
+      // Out through `omarchy-shell` rather than straight to the host. Calling
+      // the host here summons the picker in the same frame this menu closes,
+      // and this menu handing the keyboard back dismisses the picker again the
+      // moment it appears. Spawning a process puts the summon a few hundred
+      // milliseconds later, by which time there is nothing left to dismiss it.
+      if (bar) bar.run("omarchy-shell shell toggle omarchy.emojis")
     } else if (row.action === "settings") {
       close()
       if (bar) bar.run("omarchy-launch-editor " + Util.shellQuote(Quickshell.env("HOME") + "/.config/hypr/input.lua"))
