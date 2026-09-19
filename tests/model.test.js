@@ -57,41 +57,41 @@ test("short codes are xkb language codes, and fall back to the layout name", () 
   assert.strictEqual(Model.shortCode("xx", "", {}), "XX")
 })
 
-test("sources come out in kb_layout order with names", () => {
-  const list = Model.sources({ layout: "us,es", variant: "," }, catalog)
+test("layouts come out in kb_layout order with names", () => {
+  const list = Model.layouts({ layout: "us,es", variant: "," }, catalog)
   assert.deepStrictEqual(list.map(s => [s.index, s.code, s.name]), [[0, "EN", "English (US)"], [1, "ES", "Spanish"]])
 })
 
 test("icon glyphs are the language code, two letters at most", () => {
-  const list = Model.sources({ layout: "us,es,us", variant: ",,intl" }, catalog)
+  const list = Model.layouts({ layout: "us,es,us", variant: ",,intl" }, catalog)
   assert.deepStrictEqual(list.map(s => s.glyph), ["EN", "ES", "EN"])
 })
 
-test("sources sharing a code get a variant hint", () => {
-  const list = Model.sources({ layout: "us,us", variant: ",intl" }, catalog)
+test("layouts sharing a code get a variant hint", () => {
+  const list = Model.layouts({ layout: "us,us", variant: ",intl" }, catalog)
   assert.deepStrictEqual(list.map(s => s.code), ["EN", "ENI"])
   assert.strictEqual(list[1].name, "English (US, intl., with dead keys)")
 })
 
-test("three sources sharing a code all end up with different codes", () => {
-  const list = Model.sources({ layout: "us,us,us", variant: ",intl,dvorak" }, catalog)
+test("three layouts sharing a code all end up with different codes", () => {
+  const list = Model.layouts({ layout: "us,us,us", variant: ",intl,dvorak" }, catalog)
   const codes = list.map(s => s.code)
   assert.deepStrictEqual(codes, ["EN", "ENI", "END"])
   assert.strictEqual(new Set(codes).size, 3)
 })
 
 test("a taken variant letter moves on to the next letter of the variant", () => {
-  const codes = Model.sources({ layout: "us,us,us", variant: ",intl,intl2" }, catalog).map(s => s.code)
+  const codes = Model.layouts({ layout: "us,us,us", variant: ",intl,intl2" }, catalog).map(s => s.code)
   assert.deepStrictEqual(codes, ["EN", "ENI", "ENN"])
 })
 
-test("a variant with no letter left falls back to the source position", () => {
-  const codes = Model.sources({ layout: "us,us,us", variant: ",i,i" }, catalog).map(s => s.code)
+test("a variant with no letter left falls back to the layout position", () => {
+  const codes = Model.layouts({ layout: "us,us,us", variant: ",i,i" }, catalog).map(s => s.code)
   assert.deepStrictEqual(codes, ["EN", "ENI", "EN3"])
 })
 
-test("sources with no variant to fall back on still differ", () => {
-  const codes = Model.sources({ layout: "us,us", variant: "," }, catalog).map(s => s.code)
+test("layouts with no variant to fall back on still differ", () => {
+  const codes = Model.layouts({ layout: "us,us", variant: "," }, catalog).map(s => s.code)
   assert.deepStrictEqual(codes, ["EN", "EN2"])
 })
 
@@ -99,7 +99,7 @@ test("readDevices ignores buttons and virtual keyboards", () => {
   const state = Model.readDevices(JSON.stringify(devices()), catalog, "")
   assert.deepStrictEqual(state.keyboards, ["at-translated-set-2-keyboard"])
   assert.strictEqual(state.activeIndex, 0)
-  assert.strictEqual(state.sources.length, 2)
+  assert.strictEqual(state.layouts.length, 2)
 })
 
 test("readDevices reports caps lock and the active layout", () => {
@@ -143,7 +143,7 @@ test("eventKeyboardName splits once and drops the fcitx5 keyboard", () => {
   assert.strictEqual(Model.eventKeyboardName("hl-virtual-keyboard-fcitx5,English (US)"), "")
 })
 
-test("Ctrl+Space toggles between the two most recent sources", () => {
+test("Ctrl+Space toggles between the two most recent layouts", () => {
   let recent = Model.touchRecent([], 0, 3)
   recent = Model.touchRecent(recent, 2, 3)
   assert.deepStrictEqual(recent, [2, 0])
@@ -152,7 +152,7 @@ test("Ctrl+Space toggles between the two most recent sources", () => {
   assert.strictEqual(Model.previousIndex(recent, 0, 3), 2)
 })
 
-test("previousIndex falls back to next without history, and stays put with one source", () => {
+test("previousIndex falls back to next without history, and stays put with one layout", () => {
   assert.strictEqual(Model.previousIndex([0], 0, 2), 1)
   assert.strictEqual(Model.previousIndex([], 0, 1), 0)
 })
@@ -167,15 +167,15 @@ test("nextIndex cycles forward and wraps", () => {
   assert.strictEqual(Model.nextIndex(0, 1), 0)
 })
 
-test("resolveSource accepts an index, a code or a layout", () => {
-  const list = Model.sources({ layout: "us,es,us", variant: ",,intl" }, catalog)
-  assert.strictEqual(Model.resolveSource(list, "1"), 1)
-  assert.strictEqual(Model.resolveSource(list, "es"), 1)
-  assert.strictEqual(Model.resolveSource(list, "ES"), 1)
-  assert.strictEqual(Model.resolveSource(list, "us(intl)"), 2)
-  assert.strictEqual(Model.resolveSource(list, "us"), 0)
-  assert.strictEqual(Model.resolveSource(list, "9"), -1)
-  assert.strictEqual(Model.resolveSource(list, "fr"), -1)
+test("resolveLayout accepts an index, a code or a layout", () => {
+  const list = Model.layouts({ layout: "us,es,us", variant: ",,intl" }, catalog)
+  assert.strictEqual(Model.resolveLayout(list, "1"), 1)
+  assert.strictEqual(Model.resolveLayout(list, "es"), 1)
+  assert.strictEqual(Model.resolveLayout(list, "ES"), 1)
+  assert.strictEqual(Model.resolveLayout(list, "us(intl)"), 2)
+  assert.strictEqual(Model.resolveLayout(list, "us"), 0)
+  assert.strictEqual(Model.resolveLayout(list, "9"), -1)
+  assert.strictEqual(Model.resolveLayout(list, "fr"), -1)
 })
 
 test("switchCommands moves every keyboard with one argv each", () => {

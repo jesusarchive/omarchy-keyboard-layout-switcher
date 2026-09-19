@@ -49,7 +49,7 @@ function splitList(value) {
   return String(value === undefined || value === null ? "" : value).split(",")
 }
 
-// The short label for a source is xkb's language code, so us becomes EN, and
+// The short label for a layout is xkb's language code, so us becomes EN, and
 // both es and latam become ES. A layout xkb has no brief for keeps its own name.
 function shortCode(layout, variant, catalog) {
   var entry = (catalog || {})[catalogKey(layout, variant)] || (catalog || {})[layout]
@@ -57,47 +57,47 @@ function shortCode(layout, variant, catalog) {
   return code.substring(0, 3).toUpperCase()
 }
 
-// The letters drawn inside the source icon.
-function iconGlyph(source) {
-  if (!source) return ""
-  return source.code.length > 2 ? source.code.substring(0, 2) : source.code
+// The letters drawn inside the layout icon.
+function iconGlyph(layout) {
+  if (!layout) return ""
+  return layout.code.length > 2 ? layout.code.substring(0, 2) : layout.code
 }
 
-function sourceName(layout, variant, catalog) {
+function layoutName(layout, variant, catalog) {
   var entry = (catalog || {})[catalogKey(layout, variant)] || (catalog || {})[layout]
   if (entry && entry.description) return entry.description
   return variant ? layout + " (" + variant + ")" : layout
 }
 
-// Two badges must never read the same. A source whose code another source
+// Two badges must never read the same. A layout whose code another layout
 // already holds takes a variant letter instead, so us and us(intl) become EN
-// and ENI. If another source holds that letter too, this tries the rest of the
-// variant, then the source's position in the list. This walks the list in order and
-// records every code it hands out, so rewriting one source can never produce a
-// code that another source already has.
+// and ENI. If another layout holds that letter too, this tries the rest of the
+// variant, then the layout's position in the list. This walks the list in order and
+// records every code it hands out, so rewriting one layout can never produce a
+// code that another layout already has.
 function disambiguate(list) {
   var taken = {}
-  list.forEach(function (source) {
-    if (!taken[source.code]) {
-      taken[source.code] = true
+  list.forEach(function (layout) {
+    if (!taken[layout.code]) {
+      taken[layout.code] = true
       return
     }
-    var stem = source.code.substring(0, 2)
+    var stem = layout.code.substring(0, 2)
     var tries = []
-    for (var i = 0; i < source.variant.length; i++) tries.push(stem + source.variant.charAt(i).toUpperCase())
-    tries.push(stem + String(source.index + 1))
+    for (var i = 0; i < layout.variant.length; i++) tries.push(stem + layout.variant.charAt(i).toUpperCase())
+    tries.push(stem + String(layout.index + 1))
     for (var t = 0; t < tries.length; t++) {
       if (!taken[tries[t]]) {
-        source.code = tries[t]
+        layout.code = tries[t]
         break
       }
     }
-    taken[source.code] = true
+    taken[layout.code] = true
   })
 }
 
-// Input sources in kb_layout order.
-function sources(keyboard, catalog) {
+// Keyboard layouts in kb_layout order.
+function layouts(keyboard, catalog) {
   if (!keyboard || !keyboard.layout) return []
   var layouts = splitList(keyboard.layout)
   var variants = splitList(keyboard.variant)
@@ -111,11 +111,11 @@ function sources(keyboard, catalog) {
       layout: layout,
       variant: variant,
       code: shortCode(layout, variant, catalog),
-      name: sourceName(layout, variant, catalog)
+      name: layoutName(layout, variant, catalog)
     })
   }
   disambiguate(out)
-  out.forEach(function (source) { source.glyph = iconGlyph(source) })
+  out.forEach(function (layout) { layout.glyph = iconGlyph(layout) })
   return out
 }
 
@@ -149,7 +149,7 @@ function readDevices(json, catalog, namedByEvent) {
   var keyboard = selectKeyboard(typed, namedByEvent)
   return {
     keyboards: typed.map(function (k) { return String(k.name) }),
-    sources: sources(keyboard, catalog),
+    layouts: layouts(keyboard, catalog),
     activeIndex: keyboard ? (keyboard.active_layout_index || 0) : 0
   }
 }
@@ -173,7 +173,7 @@ function touchRecent(recent, index, count) {
   return next
 }
 
-// Ctrl+Space goes to the source used before the current one.
+// Ctrl+Space goes to the layout used before the current one.
 function previousIndex(recent, active, count) {
   if (count <= 1) return active
   var list = recent || []
@@ -183,17 +183,17 @@ function previousIndex(recent, active, count) {
   return nextIndex(active, count)
 }
 
-// Steps to the next source in order.
+// Steps to the next layout in order.
 function nextIndex(active, count) {
   if (count <= 1) return active
   return ((active || 0) + 1) % count
 }
 
 // `set` accepts an index, a code (ES) or a layout (es, us(intl)).
-function resolveSource(sourceList, query) {
+function resolveLayout(layoutList, query) {
   var q = String(query === undefined || query === null ? "" : query).trim()
   if (!q) return -1
-  var list = sourceList || []
+  var list = layoutList || []
   if (/^\d+$/.test(q)) {
     var n = parseInt(q, 10)
     return n >= 0 && n < list.length ? n : -1
@@ -210,7 +210,7 @@ function resolveSource(sourceList, query) {
 }
 
 // One hyprctl argv per typed keyboard, so a second keyboard doesn't stay on the
-// old source. These are separate argv vectors rather than one `hyprctl --batch`
+// old layout. These are separate argv vectors rather than one `hyprctl --batch`
 // string. Batch splits its argument on ";" and has no quoting, so a device name
 // that held a semicolon or a space would run as a command of its own.
 function switchCommands(keyboards, index) {
@@ -225,14 +225,14 @@ if (typeof module !== "undefined") {
     layoutCatalog: layoutCatalog,
     shortCode: shortCode,
     iconGlyph: iconGlyph,
-    sources: sources,
+    layouts: layouts,
     selectKeyboard: selectKeyboard,
     readDevices: readDevices,
     eventKeyboardName: eventKeyboardName,
     touchRecent: touchRecent,
     previousIndex: previousIndex,
     nextIndex: nextIndex,
-    resolveSource: resolveSource,
+    resolveLayout: resolveLayout,
     switchCommands: switchCommands
   }
 }

@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "author": "jesusarchive",
   "license": "MIT",
-  "description": "Input source menu and switcher for the Omarchy bar. Ctrl+Space goes back to the last source, Ctrl+Alt+Space steps to the next one.",
+  "description": "Keyboard layout menu and switcher for the Omarchy bar. Ctrl+Space goes back to the last layout, Ctrl+Alt+Space steps to the next one.",
   "kinds": ["bar-widget", "service"],
   "entryPoints": {
     "barWidget": "Widget.qml",
@@ -13,7 +13,7 @@
   },
   "barWidget": {
     "displayName": "Keyboard Layout Switcher",
-    "description": "Shows the active keyboard layout as an input source icon. Click for the Input menu, or bind Ctrl+Space for the last source and Ctrl+Alt+Space for the next one.",
+    "description": "Shows the active keyboard layout as a badge. Click for the layouts menu, or bind Ctrl+Space for the last layout and Ctrl+Alt+Space for the next one.",
     "category": "Compositor",
     "aliases": ["keyboard", "input", "language", "layout", "input-source"],
     "allowMultiple": false,

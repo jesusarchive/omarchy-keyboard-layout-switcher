@@ -5,13 +5,13 @@ import Quickshell.Wayland
 import qs.Commons
 import qs.Ui
 
-// The Ctrl+Space switcher: a list of source names with the current one boxed.
+// The Ctrl+Space switcher: a list of layout names with the current one boxed.
 // This follows Omarchy's own overlays (emojis, clipboard, reminders). It is a
 // full-screen layer holding a centred card that draws from the [menu] surface
 // tokens. There is no scrim and no input, because the card only reports.
 //
 // A menu pick and a scripted switch show nothing. The bar badge already names
-// the source, and it is the thing the reader clicked or typed at.
+// the layout, and it is the thing the reader clicked or typed at.
 //
 // While the card is up it takes the keyboard, so it can watch for the modifier
 // coming back up and close on that rather than on a timer. A Hyprland bind only
@@ -20,7 +20,7 @@ import qs.Ui
 // the keyboard, so a bind that still reaches the service is ignored there.
 //
 // The card lands on the monitor that has focus, the same one `toggleMenu`
-// opens the Input menu on. Omarchy's OSD leaves this unbound and stays put,
+// opens the layouts menu on. Omarchy's OSD leaves this unbound and stays put,
 // which on two monitors means reading a switch on the screen you are not
 // typing on.
 Item {
@@ -36,7 +36,7 @@ Item {
   property bool revealed: false
 
   // How long the keyboard has to stay down before the card is worth drawing.
-  // Shorter than this and the reader is going back to the last source, not
+  // Shorter than this and the reader is going back to the last layout, not
   // reading a list.
   readonly property int switcherDelayMs: 250
   readonly property bool grabbing: opened
@@ -208,7 +208,7 @@ Item {
 
           Repeater {
             id: switcherRepeater
-            model: root.service.sources
+            model: root.service.layouts
 
             BorderSurface {
               required property var modelData
@@ -221,7 +221,7 @@ Item {
               color: current ? root.selectedBackground : "transparent"
               borderSpec: current ? root.selectedBorderSpec : Border.none()
 
-              // The name alone. The icon belongs on the bar, where one source
+              // The name alone. The icon belongs on the bar, where one layout
               // has to be read at a glance. A list is read by reading it.
               Text {
                 id: nameText

@@ -15,13 +15,13 @@ Item {
   // The host fills these in.
   property var shell: null
   property var manifest: null
-  property var sources: []
+  property var layouts: []
   property int activeIndex: 0
   property var keyboards: []
   property bool loaded: false
   property var recent: []
 
-  readonly property var activeSource: sources.length > 0 ? sources[Math.max(0, Math.min(activeIndex, sources.length - 1))] : null
+  readonly property var activeLayout: layouts.length > 0 ? layouts[Math.max(0, Math.min(activeIndex, layouts.length - 1))] : null
 
   property var _catalog: ({})
   property string _typedKeyboardName: ""
@@ -46,15 +46,15 @@ Item {
     var state = Model.readDevices(text, _catalog, _typedKeyboardName)
     if (!state) return
     keyboards = state.keyboards
-    if (JSON.stringify(state.sources) !== JSON.stringify(sources)) sources = state.sources
+    if (JSON.stringify(state.layouts) !== JSON.stringify(layouts)) layouts = state.layouts
     // A reading that lands right after our own switch can predate it.
     if (!switchGuard.running && state.activeIndex !== activeIndex) {
       activeIndex = state.activeIndex
-      if (!hud.opened) recent = Model.touchRecent(recent, activeIndex, sources.length)
+      if (!hud.opened) recent = Model.touchRecent(recent, activeIndex, layouts.length)
     }
     if (!loaded) {
       loaded = true
-      recent = Model.touchRecent(recent, activeIndex, sources.length)
+      recent = Model.touchRecent(recent, activeIndex, layouts.length)
     }
   }
 
@@ -65,7 +65,7 @@ Item {
   // arrived inside the first switch. activeIndex has already moved by then, so
   // the badge would name a layout nobody is on.
   function switchTo(index) {
-    if (index < 0 || index >= sources.length || keyboards.length === 0) return false
+    if (index < 0 || index >= layouts.length || keyboards.length === 0) return false
     if (index !== activeIndex) {
       var commands = Model.switchCommands(keyboards, index)
       for (var i = 0; i < commands.length; i++) Quickshell.execDetached(commands[i])
@@ -75,7 +75,7 @@ Item {
     return true
   }
 
-  // Ctrl+Space. The first press goes back to the previously used source and
+  // Ctrl+Space. The first press goes back to the previously used layout and
   // opens the switcher. Each further press moves down the list, and the run
   // ends when the modifier comes back up.
   //
@@ -86,46 +86,46 @@ Item {
   // never took or the reader is driving this over IPC, so that one goes
   // through. `advanceGuard` covers the press where the two could cross.
   function previous() {
-    if (sources.length < 2) return "single"
+    if (layouts.length < 2) return "single"
     if (advanceGuard.running || (hud.grabbing && hud.sawKeyRecently(400)))
-      return activeSource ? activeSource.code : ""
+      return activeLayout ? activeLayout.code : ""
     var target
     if (hud.opened) {
-      target = Model.nextIndex(activeIndex, sources.length)
+      target = Model.nextIndex(activeIndex, layouts.length)
     } else {
       _switcherOrigin = activeIndex
-      target = Model.previousIndex(recent, activeIndex, sources.length)
+      target = Model.previousIndex(recent, activeIndex, layouts.length)
     }
     switchTo(target)
     hud.show()
-    return activeSource ? activeSource.code : ""
+    return activeLayout ? activeLayout.code : ""
   }
 
   // Space, arriving at the card rather than through the bind.
   function advance() {
-    if (sources.length < 2) return
+    if (layouts.length < 2) return
     advanceGuard.restart()
-    switchTo(Model.nextIndex(activeIndex, sources.length))
+    switchTo(Model.nextIndex(activeIndex, layouts.length))
     hud.show()
   }
 
-  // Steps to the next source in order.
+  // Steps to the next layout in order.
   function next() {
-    if (sources.length < 2) return "single"
-    select(Model.nextIndex(activeIndex, sources.length))
-    return activeSource ? activeSource.code : ""
+    if (layouts.length < 2) return "single"
+    select(Model.nextIndex(activeIndex, layouts.length))
+    return activeLayout ? activeLayout.code : ""
   }
 
   // Handles a direct pick from the menu or the IPC target.
   function select(index) {
     if (!switchTo(index)) return false
-    recent = Model.touchRecent(recent, index, sources.length)
+    recent = Model.touchRecent(recent, index, layouts.length)
     return true
   }
 
   function commitSwitcher() {
-    if (_switcherOrigin >= 0) recent = Model.touchRecent(recent, _switcherOrigin, sources.length)
-    recent = Model.touchRecent(recent, activeIndex, sources.length)
+    if (_switcherOrigin >= 0) recent = Model.touchRecent(recent, _switcherOrigin, layouts.length)
+    recent = Model.touchRecent(recent, activeIndex, layouts.length)
     _switcherOrigin = -1
   }
 
@@ -175,15 +175,15 @@ Item {
 
     function previous(): string { return root.previous() }
     function next(): string { return root.next() }
-    function set(source: string): string {
-      var index = Model.resolveSource(root.sources, source)
+    function set(layout: string): string {
+      var index = Model.resolveLayout(root.layouts, layout)
       if (index < 0) return "unknown"
       root.select(index)
-      return root.sources[index].code
+      return root.layouts[index].code
     }
-    function current(): string { return root.activeSource ? root.activeSource.code : "" }
+    function current(): string { return root.activeLayout ? root.activeLayout.code : "" }
     function list(): string {
-      return JSON.stringify(root.sources.map(function(s) {
+      return JSON.stringify(root.layouts.map(function(s) {
         return { index: s.index, code: s.code, layout: s.layout, variant: s.variant, name: s.name, active: s.index === root.activeIndex }
       }))
     }
@@ -246,7 +246,7 @@ Item {
   Timer {
     interval: 10000
     repeat: true
-    running: !root.loaded || root.sources.length > 1
+    running: !root.loaded || root.layouts.length > 1
     onTriggered: root.refresh()
   }
 

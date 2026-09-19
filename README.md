@@ -1,23 +1,23 @@
 # Keyboard Layout Switcher for Omarchy
 
-An input source menu for the [Omarchy](https://omarchy.org) bar. The bar shows
-the active keyboard layout as a small badge (`EN`, `ES`). Click it for the Input
-menu, or bind Ctrl+Space to go straight back to the source you used before and
+A keyboard layout menu for the [Omarchy](https://omarchy.org) bar. The bar shows
+the active keyboard layout as a small badge (`EN`, `ES`). Click it for the layouts
+menu, or bind Ctrl+Space to go straight back to the layout you used before and
 Ctrl+Alt+Space to step forward through them.
 Plugin ID: `jesusarchive.keyboard-layout-switcher`. MIT licensed.
 
-![The EN badge in the bar with the Input menu open, listing English (US) and Spanish](preview.png)
+![The EN badge in the bar with the layouts menu open, listing English (US) and Spanish](preview.png)
 
 - The bar badge carries the layout's language code from xkb. Hover it for the
   full name ("Spanish").
-- The Input menu lists every source with a ✓ on the active one, then "Show
+- The layouts menu lists every layout with a ✓ on the active one, then "Show
   Emoji & Symbols" (Omarchy's emoji picker) and "Open Keyboard Settings…"
   (`~/.config/hypr/input.lua`).
-- Ctrl+Space on its own switches to the most recently used source and shows
+- Ctrl+Space on its own switches to the most recently used layout and shows
   nothing. Keep Ctrl down instead and the switcher appears, listing every
-  source. Tap Space with Ctrl still down to walk the list, and let go to settle
-  on whichever source you landed on.
-- Ctrl+Alt+Space steps to the next source in order and shows nothing.
+  layout. Tap Space with Ctrl still down to walk the list, and let go to settle
+  on whichever layout you landed on.
+- Ctrl+Alt+Space steps to the next layout in order and shows nothing.
 - Every keyboard switches together, so a second keyboard never stays on the old
   layout. The plugin ignores virtual keyboards and ACPI buttons.
 - The badge, the menu and the switcher use Omarchy's menu colors and fonts.
@@ -62,17 +62,17 @@ The plugin doesn't bind any keys. Add these two lines to
 `~/.config/hypr/bindings.lua`:
 
 ```lua
-o.bind("CTRL + SPACE", "Previous input source", "omarchy-shell jesusarchive.keyboard-layout-switcher previous")
-o.bind("CTRL + ALT + SPACE", "Next input source", "omarchy-shell jesusarchive.keyboard-layout-switcher next")
+o.bind("CTRL + SPACE", "Previous keyboard layout", "omarchy-shell jesusarchive.keyboard-layout-switcher previous")
+o.bind("CTRL + ALT + SPACE", "Next keyboard layout", "omarchy-shell jesusarchive.keyboard-layout-switcher next")
 ```
 
 | Chord | Action |
 |---|---|
-| Ctrl+Space, released at once | go back to the source you used before, showing nothing |
+| Ctrl+Space, released at once | go back to the layout you used before, showing nothing |
 | Ctrl+Space, Ctrl kept down | the same switch, and the switcher appears |
 | Ctrl held, Space again | move down the list |
-| Ctrl released | close the switcher on the source you landed on |
-| Ctrl+Alt+Space | step to the next source in order, with no switcher |
+| Ctrl released | close the switcher on the layout you landed on |
+| Ctrl+Alt+Space | step to the next layout in order, with no switcher |
 
 Hyprland reloads the file on save, and both bindings show up in Omarchy's
 keybindings list (Super+K). Omarchy claims neither chord. It uses Super+Space
@@ -96,8 +96,8 @@ Then delete the binding from `bindings.lua`.
 
 | Where | Action |
 |---|---|
-| Bar: left or right click | open the Input menu |
-| Menu: click a source | switch to it |
+| Bar: left or right click | open the layouts menu |
+| Menu: click a layout | switch to it |
 
 Keys while the menu is open:
 
@@ -110,7 +110,7 @@ Keys while the menu is open:
 
 These come from Omarchy's shared panel key handling, so they are the same keys
 every other bar panel uses. The menu opens with the highlight hidden and the
-cursor already on the active source, so the first key press reveals it without
+cursor already on the active layout, so the first key press reveals it without
 moving.
 
 ### Scripting
@@ -118,17 +118,17 @@ moving.
 The plugin registers an IPC target:
 
 ```bash
-omarchy-shell jesusarchive.keyboard-layout-switcher previous   # the source used before this one
-omarchy-shell jesusarchive.keyboard-layout-switcher next       # the next source in order
+omarchy-shell jesusarchive.keyboard-layout-switcher previous   # the layout used before this one
+omarchy-shell jesusarchive.keyboard-layout-switcher next       # the next layout in order
 omarchy-shell jesusarchive.keyboard-layout-switcher set es     # by index, code (ES) or layout (es, us(intl))
 omarchy-shell jesusarchive.keyboard-layout-switcher current    # prints the active code, e.g. EN
-omarchy-shell jesusarchive.keyboard-layout-switcher list       # JSON of every source
+omarchy-shell jesusarchive.keyboard-layout-switcher list       # JSON of every layout
 omarchy-shell jesusarchive.keyboard-layout-switcher toggle     # open the menu on the focused monitor
 omarchy-shell jesusarchive.keyboard-layout-switcher refresh
 ```
 
 `previous` and `next` print the new code, or `single` when there's only one
-source. `set` prints `unknown` for a source that doesn't exist.
+layout. `set` prints `unknown` for a layout that doesn't exist.
 
 ## How it works
 
@@ -145,7 +145,7 @@ source. `set` prints `unknown` for a source that doesn't exist.
   seconds, because plugging a keyboard in raises no Hyprland event. A
   single-layout install has nothing to switch, so the service skips the poll.
 - Names and codes come from `xkbcli list`, read once at start. `es` becomes
-  "Spanish" and `ES`. Two sources with the same code (`us` and `us(intl)`) get a
+  "Spanish" and `ES`. Two layouts with the same code (`us` and `us(intl)`) get a
   variant letter so their badges differ.
 - Ctrl+Space keeps a most-recently-used list, and a run of presses while the
   switcher is up counts as one use.
@@ -178,8 +178,8 @@ Files:
 - `manifest.json`
 - `Service.qml`: the layout state, the switching and the IPC target
 - `SwitchHud.qml`: the switcher overlay
-- `Widget.qml`: the bar badge and the Input menu
-- `SourceIcon.qml`: the badge drawing
+- `Widget.qml`: the bar badge and the layouts menu
+- `LayoutIcon.qml`: the badge drawing
 - `Model.js`: the pure logic
 - `tests/`: the node tests
 - `preview.png`: the marketplace preview, also the image above

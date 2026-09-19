@@ -3,8 +3,8 @@ import Quickshell
 import qs.Commons
 import qs.Ui
 
-// The bar icon and the Input menu. The menu holds the source icon, a ✓ on the
-// active source, Emoji & Symbols and Keyboard Settings. Omarchy's panel
+// The bar icon and the layouts menu. The menu holds the layout icon, a ✓ on the
+// active layout, Emoji & Symbols and Keyboard Settings. Omarchy's panel
 // components draw all of it.
 Panel {
   id: root
@@ -14,9 +14,9 @@ Panel {
   readonly property string pluginId: "jesusarchive.keyboard-layout-switcher"
 
   property QtObject svc: null
-  readonly property var sources: svc ? svc.sources : []
+  readonly property var layouts: svc ? svc.layouts : []
   readonly property int activeIndex: svc ? svc.activeIndex : 0
-  readonly property var activeSource: svc ? svc.activeSource : null
+  readonly property var activeLayout: svc ? svc.activeLayout : null
   readonly property string screenName: {
     var win = button.QsWindow.window
     return win && win.screen ? String(win.screen.name) : ""
@@ -27,8 +27,8 @@ Panel {
 
   // Menu rows in display order. Keyboard navigation steps over the separators.
   readonly property var rows: {
-    var out = sources.map(function(s) {
-      return { kind: "source", index: s.index, label: s.name, glyph: s.glyph }
+    var out = layouts.map(function(s) {
+      return { kind: "layout", index: s.index, label: s.name, glyph: s.glyph }
     })
     out.push({ kind: "separator" })
     out.push({ kind: "action", action: "emoji", label: "Show Emoji & Symbols", icon: "" })
@@ -65,7 +65,7 @@ Panel {
   }
 
   onOpenedChanged: if (opened) {
-    // Open on the active source, so the first j or k moves from where the
+    // Open on the active layout, so the first j or k moves from where the
     // reader is rather than from the top of the menu.
     cursorIndex = actionable(activeIndex) ? activeIndex : 0
     cursorActive = false
@@ -88,7 +88,7 @@ Panel {
 
   function activate(row) {
     if (!row || !svc) return
-    if (row.kind === "source") {
+    if (row.kind === "layout") {
       svc.select(row.index)
       close()
     } else if (row.action === "emoji") {
@@ -103,7 +103,7 @@ Panel {
     }
   }
 
-  visible: svc !== null && sources.length > 0
+  visible: svc !== null && layouts.length > 0
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
@@ -113,12 +113,12 @@ Panel {
     id: button
     anchors.fill: parent
     bar: root.bar
-    hasVisualContent: root.activeSource !== null
+    hasVisualContent: root.activeLayout !== null
     labelVisible: false
     fixedWidth: iconRow.implicitWidth + Style.space(12)
-    tooltipText: root.opened || !root.activeSource ? "" : root.activeSource.name
+    tooltipText: root.opened || !root.activeLayout ? "" : root.activeLayout.name
     // Either button opens the menu. A right click used to switch straight to
-    // the next source, which meant the same gesture did different things here
+    // the next layout, which meant the same gesture did different things here
     // and on every other bar widget.
     onPressed: root.toggle()
 
@@ -138,10 +138,10 @@ Panel {
       anchors.centerIn: parent
       spacing: Style.space(5)
 
-      SourceIcon {
+      LayoutIcon {
         anchors.verticalCenter: parent.verticalCenter
         size: Style.space(15)
-        glyph: root.activeSource ? root.activeSource.glyph : ""
+        glyph: root.activeLayout ? root.activeLayout.glyph : ""
         fill: root.foreground
         ink: root.bar && !root.bar.transparent ? root.bar.background : Color.background
         fontFamily: root.fontFamily
@@ -149,7 +149,7 @@ Panel {
     }
   }
 
-  // ----------------------------------------------------------- input menu
+  // --------------------------------------------------------- layouts menu
 
   KeyboardPanel {
     id: panel
@@ -223,7 +223,7 @@ Panel {
       readonly property var row: parent ? parent.rowData : null
       readonly property int rowIndex: parent ? parent.rowIndex : -1
       readonly property bool hot: root.cursorActive && root.cursorIndex === rowIndex
-      readonly property bool checked: !!row && row.kind === "source" && row.index === root.activeIndex
+      readonly property bool checked: !!row && row.kind === "layout" && row.index === root.activeIndex
       readonly property color textColor: hot ? Color.menu.selectedText : Color.popups.text
 
       implicitHeight: Style.space(28)
@@ -243,7 +243,7 @@ Panel {
         x: Style.space(6)
         spacing: Style.space(6)
 
-        // The ✓ column, blank on every row but the active source.
+        // The ✓ column, blank on every row but the active layout.
         Text {
           width: Style.space(14)
           anchors.verticalCenter: parent.verticalCenter
@@ -256,13 +256,13 @@ Panel {
         }
 
         Item {
-          visible: !!rowItem.row && (rowItem.row.kind === "source" || !!rowItem.row.icon)
+          visible: !!rowItem.row && (rowItem.row.kind === "layout" || !!rowItem.row.icon)
           width: Style.space(22)
           height: Style.space(18)
           anchors.verticalCenter: parent.verticalCenter
 
-          SourceIcon {
-            visible: !!rowItem.row && rowItem.row.kind === "source"
+          LayoutIcon {
+            visible: !!rowItem.row && rowItem.row.kind === "layout"
             anchors.centerIn: parent
             size: Style.space(17)
             glyph: rowItem.row && rowItem.row.glyph ? rowItem.row.glyph : ""
