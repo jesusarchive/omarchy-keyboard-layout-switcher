@@ -14,8 +14,10 @@ Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
   Emoji & Symbols" (Omarchy's emoji picker), "Show Input Source Name" and "Open
   Keyboard Settings…" (`~/.config/hypr/input.lua`).
 - Ctrl+Space switches to the most recently used source and shows a switcher
-  listing every source. Hold Ctrl and tap Space again while the switcher is up
-  to move down the list.
+  listing every source. Press it again while the switcher is up to move down the
+  list. Each press restarts the `hudTimeoutMs` window, 900 ms by default, so a
+  run ends when you stop pressing. Holding Ctrl down does not extend it, because
+  Hyprland reports the press and never the release.
 - Picking a source from the menu shows a small indicator naming it, with ⇪
   while Caps Lock is on.
 - Every keyboard switches together, so a second keyboard never stays on the old

@@ -5,7 +5,8 @@ import qs.Commons
 import qs.Ui
 
 // The two overlays that report an input source change:
-//  - switcher: the Ctrl+Space list of source names, current one boxed
+//  - switcher: the Ctrl+Space list of sources, each with its icon and name,
+//    current one boxed
 //  - indicator: a small badge with the new source, plus ⇪ when Caps Lock is on
 // This follows Omarchy's own overlays (emojis, clipboard, reminders). It is a
 // full-screen layer holding a centred card that draws from the [menu] surface
@@ -111,9 +112,10 @@ Item {
             model: root.service.sources
 
             BorderSurface {
+              id: switcherRow
               required property var modelData
               readonly property bool current: modelData.index === root.service.activeIndex
-              readonly property real labelWidth: nameText.implicitWidth
+              readonly property real labelWidth: rowContent.implicitWidth
 
               width: switcherColumn.rowWidth
               height: Math.max(Style.space(40), Style.font.heading + Style.space(20))
@@ -121,14 +123,31 @@ Item {
               color: current ? root.selectedBackground : "transparent"
               borderSpec: current ? root.selectedBorderSpec : Border.none()
 
-              Text {
-                id: nameText
+              // The letters belong on every row. Without them the switcher is
+              // the only one of the three surfaces that names a source without
+              // showing the icon the bar and the indicator both draw.
+              Row {
+                id: rowContent
                 anchors.centerIn: parent
-                textFormat: Text.PlainText
-                text: modelData.name
-                color: parent.current ? root.selectedText : root.foreground
-                font.family: root.fontFamily
-                font.pixelSize: Style.font.heading
+                spacing: Style.spacing.md
+
+                SourceIcon {
+                  anchors.verticalCenter: parent.verticalCenter
+                  size: Style.font.heading
+                  glyph: switcherRow.modelData.glyph
+                  fill: switcherRow.current ? root.selectedText : root.foreground
+                  ink: switcherRow.current ? root.selectedBackground : root.background
+                  fontFamily: root.fontFamily
+                }
+
+                Text {
+                  anchors.verticalCenter: parent.verticalCenter
+                  textFormat: Text.PlainText
+                  text: switcherRow.modelData.name
+                  color: switcherRow.current ? root.selectedText : root.foreground
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.heading
+                }
               }
             }
           }
