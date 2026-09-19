@@ -13,6 +13,12 @@ import qs.Ui
 // A menu pick and a scripted switch show nothing. The bar badge already names
 // the source, and it is the thing the reader clicked or typed at.
 //
+// While the card is up it takes the keyboard, so it can watch for the modifier
+// coming back up and close on that rather than on a timer. A Hyprland bind only
+// ever reports the press, but a layer surface with exclusive focus is handed
+// the Key_Control release. The card owns the Space key for as long as it holds
+// the keyboard, so a bind that still reaches the service is ignored there.
+//
 // The card lands on the monitor that has focus, the same one `toggleMenu`
 // opens the Input menu on. Omarchy's OSD leaves this unbound and stays put,
 // which on two monitors means reading a switch on the screen you are not
@@ -23,6 +29,33 @@ Item {
   required property var service
 
   property bool opened: false
+
+  // Turned off by `holdToCycle`, which falls the whole thing back to the timer.
+  property bool holdToCycle: true
+  readonly property bool grabbing: opened && holdToCycle
+  // When a key last reached the card, as milliseconds since the epoch. The
+  // service reads it to tell its own duplicate from a real press: a bind that
+  // fires for the same Space lands a shell and a qs client later, so it is the
+  // one that arrives just after a key. A bind firing with no key before it is
+  // the only signal there is, and has to be acted on.
+  property double lastKeyAt: 0
+
+  function sawKeyRecently(ms) {
+    return lastKeyAt > 0 && (Date.now() - lastKeyAt) < ms
+  }
+
+  // How long the card waits with the keyboard and nothing arriving. Only a
+  // release that never came can get this far, so it is a safety net, not the
+  // mechanism.
+  readonly property int grabIdleMs: 5000
+
+  signal advanceRequested()
+
+  function isModifier(key) {
+    return key === Qt.Key_Control || key === Qt.Key_Alt || key === Qt.Key_Meta
+      || key === Qt.Key_Shift || key === Qt.Key_Super_L || key === Qt.Key_Super_R
+      || key === Qt.Key_AltGr
+  }
 
   // The output the card sits on. Captured when it opens rather than bound to
   // the focused monitor, so moving focus mid-switch cannot make a card that is
@@ -57,9 +90,9 @@ Item {
   Component.onCompleted: targetScreen = focusedScreen()
 
   function show() {
-    if (!opened) targetScreen = focusedScreen()
+    if (!opened) { targetScreen = focusedScreen(); lastKeyAt = 0 }
     opened = true
-    hideTimer.interval = service.hudTimeoutMs
+    hideTimer.interval = grabbing ? grabIdleMs : service.hudTimeoutMs
     hideTimer.restart()
   }
 
@@ -82,11 +115,35 @@ Item {
     color: "transparent"
     WlrLayershell.namespace: "jesusarchive-language-switcher"
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: root.grabbing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     exclusionMode: ExclusionMode.Ignore
     // The card only reports, so it must never take a click from the window
-    // underneath it.
+    // underneath it. The keyboard is a different matter; see the grab above.
     mask: Region {}
+
+    Item {
+      anchors.fill: parent
+      focus: true
+
+      // Space walks the list. Anything else means the reader has moved on, so
+      // give the keyboard straight back rather than swallowing their typing.
+      Keys.onPressed: function(event) {
+        root.lastKeyAt = Date.now()
+        hideTimer.restart()
+        if (event.key === Qt.Key_Space) root.advanceRequested()
+        else if (!root.isModifier(event.key)) root.close()
+        event.accepted = true
+      }
+
+      // The release the whole grab exists for. Qt still reports Control in
+      // `modifiers` here, so the key itself is what to read.
+      Keys.onReleased: function(event) {
+        root.lastKeyAt = Date.now()
+        if (root.isModifier(event.key)) root.close()
+        else hideTimer.restart()
+        event.accepted = true
+      }
+    }
 
     BorderSurface {
       id: card

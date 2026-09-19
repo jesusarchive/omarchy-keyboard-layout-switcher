@@ -27,6 +27,7 @@ Item {
   readonly property var activeSource: sources.length > 0 ? sources[Math.max(0, Math.min(activeIndex, sources.length - 1))] : null
 
   readonly property bool showSwitcher: setting("showSwitcher", true) !== false
+  readonly property bool holdToCycle: setting("holdToCycle", true) !== false
   readonly property int hudTimeoutMs: intSetting("hudTimeoutMs", 900, 300, 5000)
 
   property var _catalog: ({})
@@ -93,12 +94,19 @@ Item {
   }
 
   // Ctrl+Space. The first press goes back to the previously used source and
-  // opens the switcher. Each further press while the switcher is still up moves
-  // down the list. Each press restarts the hudTimeoutMs window, so the run ends
-  // when the reader stops pressing. Hyprland reports the press and never the
-  // release, so there is nothing else to end it on.
+  // opens the switcher. Each further press moves down the list, and the run
+  // ends when the modifier comes back up.
+  //
+  // Once the card holds the keyboard, Space reaches the card directly and the
+  // card does the moving. A bind that still fires would then move the list
+  // twice for one press, so drop the one that follows a key the card just saw.
+  // A call with no key before it is the only signal there is, whether the grab
+  // never took or the reader is driving this over IPC, so that one goes
+  // through. `advanceGuard` covers the press where the two could cross.
   function previous() {
     if (sources.length < 2) return "single"
+    if (advanceGuard.running || (hud.grabbing && hud.sawKeyRecently(400)))
+      return activeSource ? activeSource.code : ""
     var target
     if (hud.opened) {
       target = Model.nextIndex(activeIndex, sources.length)
@@ -110,6 +118,14 @@ Item {
     if (showSwitcher) hud.show()
     else commitSwitcher()
     return activeSource ? activeSource.code : ""
+  }
+
+  // Space, arriving at the card rather than through the bind.
+  function advance() {
+    if (sources.length < 2) return
+    advanceGuard.restart()
+    switchTo(Model.nextIndex(activeIndex, sources.length))
+    hud.show()
   }
 
   // Steps to the next source in order.
@@ -259,9 +275,18 @@ Item {
     onTriggered: root.refresh()
   }
 
+  // The card's key beats the bind's IPC by the time it takes to spawn a shell
+  // and a qs client, so this only has to outlast that.
+  Timer {
+    id: advanceGuard
+    interval: 250
+  }
+
   SwitchHud {
     id: hud
     service: root
+    holdToCycle: root.holdToCycle
     onSwitcherClosed: root.commitSwitcher()
+    onAdvanceRequested: root.advance()
   }
 }
