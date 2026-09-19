@@ -14,9 +14,10 @@ Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
 - The Input menu lists every source with a ✓ on the active one, then "Show
   Emoji & Symbols" (Omarchy's emoji picker), "Show Input Source Name" and "Open
   Keyboard Settings…" (`~/.config/hypr/input.lua`).
-- Ctrl+Space switches to the most recently used source and shows a switcher
-  listing every source. Keep Ctrl down and tap Space to walk down the list.
-  Letting go of Ctrl closes the switcher on whichever source you landed on.
+- Ctrl+Space on its own switches to the most recently used source and shows
+  nothing. Keep Ctrl down instead and the switcher appears, listing every
+  source. Tap Space with Ctrl still down to walk the list, and let go to settle
+  on whichever source you landed on.
 - Ctrl+Alt+Space steps to the next source in order and shows nothing.
 - Every keyboard switches together, so a second keyboard never stays on the old
   layout. The plugin ignores virtual keyboards and ACPI buttons.
@@ -69,7 +70,8 @@ o.bind("CTRL + ALT + SPACE", "Next input source", "omarchy-shell jesusarchive.la
 
 | Chord | Action |
 |---|---|
-| Ctrl+Space | go back to the source you used before, and show the switcher |
+| Ctrl+Space, released at once | go back to the source you used before, showing nothing |
+| Ctrl+Space, Ctrl kept down | the same switch, and the switcher appears |
 | Ctrl held, Space again | move down the list |
 | Ctrl released | close the switcher on the source you landed on |
 | Ctrl+Alt+Space | step to the next source in order, with no switcher |
@@ -140,6 +142,7 @@ in Omarchy's settings panel:
 | `showSourceName` | `false` | Show the layout name next to the badge |
 | `showSwitcher` | `true` | Show the source list on Ctrl+Space. Turn it off to switch with no overlay at all |
 | `holdToCycle` | `true` | Keep the switcher up while the modifier is held, and close when you let go. Turn it off to close on `hudTimeoutMs` instead |
+| `switcherDelayMs` | `250` | How long to hold before the switcher appears. A quicker Ctrl+Space shows nothing. `0` shows it straight away |
 | `hudTimeoutMs` | `900` | How long the switcher stays up with `holdToCycle` off (300 to 5000 ms) |
 | `hideWhenSingle` | `false` | Hide the badge when you have only one layout |
 
@@ -162,12 +165,15 @@ in Omarchy's settings panel:
   variant letter so their badges differ.
 - Ctrl+Space keeps a most-recently-used list, and a run of presses while the
   switcher is up counts as one use.
-- While the switcher is up it holds the keyboard, which is the only way to learn
-  that the modifier came back up. A Hyprland binding reports the press and never
-  the release. So Space reaches the switcher directly and the switcher walks the
-  list, while a binding that fires for the same press is dropped. If the grab
-  never takes, the binding drives the list as before and the switcher closes on
-  a timeout. Any key that is not Space hands the keyboard straight back.
+- A Ctrl+Space takes the keyboard straight away and draws nothing. That grab is
+  the only way to learn that the modifier came back up, because a Hyprland
+  binding reports the press and never the release. A release inside
+  `switcherDelayMs` ends the run having shown nothing, and the switch has
+  already happened. Past that, the switcher appears.
+- While it is up, Space reaches the switcher directly and the switcher walks the
+  list, so a binding that fires for the same press is dropped. If the grab never
+  takes, the binding drives the list as before and the switcher closes on a
+  timeout. Any key that is not Space hands the keyboard straight back.
 - `Widget.qml` is the bar badge and menu, one per monitor. It only renders what
   the service exposes.
 - `Model.js` holds the parsing and switching logic with no Qt imports, so node

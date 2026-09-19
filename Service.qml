@@ -28,6 +28,7 @@ Item {
 
   readonly property bool showSwitcher: setting("showSwitcher", true) !== false
   readonly property bool holdToCycle: setting("holdToCycle", true) !== false
+  readonly property int switcherDelayMs: intSetting("switcherDelayMs", 250, 0, 1000)
   readonly property int hudTimeoutMs: intSetting("hudTimeoutMs", 900, 300, 5000)
 
   property var _catalog: ({})
@@ -286,6 +287,7 @@ Item {
     id: hud
     service: root
     holdToCycle: root.holdToCycle
+    switcherDelayMs: root.switcherDelayMs
     onSwitcherClosed: root.commitSwitcher()
     onAdvanceRequested: root.advance()
   }

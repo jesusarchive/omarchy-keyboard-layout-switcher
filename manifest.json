@@ -22,6 +22,7 @@
       "showSourceName": false,
       "showSwitcher": true,
       "holdToCycle": true,
+      "switcherDelayMs": 250,
       "hudTimeoutMs": 900,
       "hideWhenSingle": false
     },
@@ -29,6 +30,7 @@
       { "key": "showSourceName", "type": "boolean", "label": "Show input source name", "defaultValue": false, "description": "Show the layout name next to the icon in the bar." },
       { "key": "showSwitcher", "type": "boolean", "label": "Show switcher on Ctrl+Space", "defaultValue": true },
       { "key": "holdToCycle", "type": "boolean", "label": "Keep the switcher up while the modifier is held", "defaultValue": true, "description": "The switcher takes the keyboard and closes when you let go of Ctrl. Turn it off to close on the timeout instead." },
+      { "key": "switcherDelayMs", "type": "integer", "label": "Hold before the switcher appears (ms)", "min": 0, "max": 1000, "step": 50, "defaultValue": 250, "description": "A Ctrl+Space quicker than this switches without showing anything. 0 shows it straight away." },
       { "key": "hudTimeoutMs", "type": "integer", "label": "Switcher timeout (ms)", "min": 300, "max": 5000, "step": 100, "defaultValue": 900 },
       { "key": "hideWhenSingle", "type": "boolean", "label": "Hide with a single layout", "defaultValue": false }
     ]

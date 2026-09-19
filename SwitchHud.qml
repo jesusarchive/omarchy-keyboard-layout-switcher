@@ -28,10 +28,16 @@ Item {
 
   required property var service
 
+  // Live, meaning the card holds the keyboard and the run is in progress. It
+  // says nothing about whether anything is drawn.
   property bool opened: false
+  // Drawn. A tap that is over before switcherDelayMs never gets here, so
+  // Ctrl+Space on its own switches in silence.
+  property bool revealed: false
 
   // Turned off by `holdToCycle`, which falls the whole thing back to the timer.
   property bool holdToCycle: true
+  property int switcherDelayMs: 250
   readonly property bool grabbing: opened && holdToCycle
   // When a key last reached the card, as milliseconds since the epoch. The
   // service reads it to tell its own duplicate from a real press: a bind that
@@ -89,22 +95,41 @@ Item {
   // monitor and move a card that is already up.
   Component.onCompleted: targetScreen = focusedScreen()
 
+  // Arms the run. Whether anything appears is up to the modifier: the card is
+  // drawn once switcherDelayMs passes with the keyboard still held, and a
+  // release before that closes the run having shown nothing. Without the grab
+  // there is nothing to wait for, so it draws at once.
   function show() {
     if (!opened) { targetScreen = focusedScreen(); lastKeyAt = 0 }
     opened = true
+    if (!grabbing || switcherDelayMs <= 0) reveal()
+    else if (!revealed) revealTimer.restart()
     hideTimer.interval = grabbing ? grabIdleMs : service.hudTimeoutMs
     hideTimer.restart()
   }
 
+  function reveal() {
+    revealTimer.stop()
+    revealed = true
+  }
+
   function close() {
     if (!opened) return
+    revealTimer.stop()
     opened = false
+    revealed = false
     switcherClosed()
   }
 
   Timer {
     id: hideTimer
     onTriggered: root.close()
+  }
+
+  Timer {
+    id: revealTimer
+    interval: root.switcherDelayMs
+    onTriggered: root.reveal()
   }
 
   PanelWindow {
@@ -130,7 +155,10 @@ Item {
       Keys.onPressed: function(event) {
         root.lastKeyAt = Date.now()
         hideTimer.restart()
-        if (event.key === Qt.Key_Space) root.advanceRequested()
+        if (event.key === Qt.Key_Space) {
+          root.reveal()
+          root.advanceRequested()
+        }
         else if (!root.isModifier(event.key)) root.close()
         event.accepted = true
       }
@@ -154,7 +182,7 @@ Item {
       color: root.background
       borderSpec: root.borderSpec
       padding: root.contentMargin
-      opacity: root.opened ? 1 : 0
+      opacity: root.revealed ? 1 : 0
 
       Behavior on opacity { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
