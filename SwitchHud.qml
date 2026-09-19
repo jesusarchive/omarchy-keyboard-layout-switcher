@@ -5,12 +5,13 @@ import Quickshell.Wayland
 import qs.Commons
 import qs.Ui
 
-// The two overlays that report an input source change:
-//  - switcher: the Ctrl+Space list of source names, current one boxed
-//  - indicator: a small badge with the new source, plus ⇪ when Caps Lock is on
+// The Ctrl+Space switcher: a list of source names with the current one boxed.
 // This follows Omarchy's own overlays (emojis, clipboard, reminders). It is a
 // full-screen layer holding a centred card that draws from the [menu] surface
 // tokens. There is no scrim and no input, because the card only reports.
+//
+// A menu pick and a scripted switch show nothing. The bar badge already names
+// the source, and it is the thing the reader clicked or typed at.
 //
 // The card lands on the monitor that has focus, the same one `toggleMenu`
 // opens the Input menu on. Omarchy's OSD leaves this unbound and stays put,
@@ -21,9 +22,7 @@ Item {
 
   required property var service
 
-  property string mode: ""
   property bool opened: false
-  readonly property bool switcherOpen: opened && mode === "switcher"
 
   // The output the card sits on. Captured when it opens rather than bound to
   // the focused monitor, so moving focus mid-switch cannot make a card that is
@@ -57,10 +56,8 @@ Item {
   // monitor and move a card that is already up.
   Component.onCompleted: targetScreen = focusedScreen()
 
-  function show(nextMode) {
-    if (opened && mode !== nextMode && mode === "switcher") switcherClosed()
+  function show() {
     if (!opened) targetScreen = focusedScreen()
-    mode = nextMode
     opened = true
     hideTimer.interval = service.hudTimeoutMs
     hideTimer.restart()
@@ -68,9 +65,8 @@ Item {
 
   function close() {
     if (!opened) return
-    var wasSwitcher = mode === "switcher"
     opened = false
-    if (wasSwitcher) switcherClosed()
+    switcherClosed()
   }
 
   Timer {
@@ -109,14 +105,11 @@ Item {
         id: content
         x: card.contentLeftInset
         y: card.contentTopInset
-        implicitWidth: root.mode === "switcher" ? switcherColumn.implicitWidth : indicatorRow.implicitWidth
-        implicitHeight: root.mode === "switcher" ? switcherColumn.implicitHeight : indicatorRow.implicitHeight
-
-        // ------------------------------------------------------ switcher
+        implicitWidth: switcherColumn.implicitWidth
+        implicitHeight: switcherColumn.implicitHeight
 
         Column {
           id: switcherColumn
-          visible: root.mode === "switcher"
           spacing: Style.spacing.sm
 
           readonly property real rowWidth: {
@@ -143,9 +136,8 @@ Item {
               color: current ? root.selectedBackground : "transparent"
               borderSpec: current ? root.selectedBorderSpec : Border.none()
 
-              // The name alone. The icon belongs on the bar and the indicator,
-              // where one source has to be read at a glance. A list is read by
-              // reading it.
+              // The name alone. The icon belongs on the bar, where one source
+              // has to be read at a glance. A list is read by reading it.
               Text {
                 id: nameText
                 anchors.centerIn: parent
@@ -156,43 +148,6 @@ Item {
                 font.pixelSize: Style.font.heading
               }
             }
-          }
-        }
-
-        // ----------------------------------------------------- indicator
-
-        Row {
-          id: indicatorRow
-          visible: root.mode === "indicator"
-          spacing: Style.spacing.md
-
-          SourceIcon {
-            anchors.verticalCenter: parent.verticalCenter
-            size: Style.font.displayLarge
-            glyph: root.service.activeSource ? root.service.activeSource.glyph : ""
-            fill: root.selectedText
-            ink: root.background
-            fontFamily: root.fontFamily
-          }
-
-          Text {
-            anchors.verticalCenter: parent.verticalCenter
-            textFormat: Text.PlainText
-            text: root.service.activeSource ? root.service.activeSource.name : ""
-            color: root.foreground
-            font.family: root.fontFamily
-            font.pixelSize: Style.font.heading
-          }
-
-          Text {
-            visible: root.service.capsLock
-            anchors.verticalCenter: parent.verticalCenter
-            textFormat: Text.PlainText
-            text: "⇪"
-            color: root.selectedText
-            font.family: root.fontFamily
-            font.bold: true
-            font.pixelSize: Style.font.heading
           }
         }
       }

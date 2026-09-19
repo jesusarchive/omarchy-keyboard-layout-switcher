@@ -150,8 +150,7 @@ function readDevices(json, catalog, namedByEvent) {
   return {
     keyboards: typed.map(function (k) { return String(k.name) }),
     sources: sources(keyboard, catalog),
-    activeIndex: keyboard ? (keyboard.active_layout_index || 0) : 0,
-    capsLock: typed.some(function (k) { return k.capsLock === true })
+    activeIndex: keyboard ? (keyboard.active_layout_index || 0) : 0
   }
 }
 

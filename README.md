@@ -18,11 +18,11 @@ Plugin ID: `jesusarchive.language-switcher`. MIT licensed.
   list. Each press restarts the `hudTimeoutMs` window, 900 ms by default, so a
   run ends when you stop pressing. Holding Ctrl down does not extend it, because
   Hyprland reports the press and never the release.
-- Picking a source from the menu shows a small indicator naming it, with ⇪
-  while Caps Lock is on.
 - Every keyboard switches together, so a second keyboard never stays on the old
   layout. The plugin ignores virtual keyboards and ACPI buttons.
-- The badge and both overlays use Omarchy's menu colors and fonts.
+- The badge, the menu and the switcher use Omarchy's menu colors and fonts.
+- A menu pick or a scripted switch shows no overlay. The bar badge changes, and
+  that is the only report.
 
 ## Install
 
@@ -130,18 +130,17 @@ in Omarchy's settings panel:
 | Key | Default | Meaning |
 |---|---|---|
 | `showSourceName` | `false` | Show the layout name next to the badge |
-| `showSwitcher` | `true` | Show the source list on Ctrl+Space. Turn it off to switch with no overlay |
-| `showIndicator` | `true` | Show the small badge after a menu pick or a scripted switch |
-| `hudTimeoutMs` | `900` | How long the switcher and indicator stay up (300 to 5000 ms) |
+| `showSwitcher` | `true` | Show the source list on Ctrl+Space. Turn it off to switch with no overlay at all |
+| `hudTimeoutMs` | `900` | How long the switcher stays up (300 to 5000 ms) |
 | `hideWhenSingle` | `false` | Hide the badge when you have only one layout |
 
 ## How it works
 
 - `Service.qml` runs once for the whole shell. It reads `hyprctl -j devices`
   on start and on every `activelayout` and `configreloaded` event from
-  Hyprland, owns the IPC target, and draws the overlays in `SwitchHud.qml`.
-  Both overlays open on the monitor that has focus, and stay on it until they
-  close, so moving focus mid-switch cannot make a card that is already up jump
+  Hyprland, owns the IPC target, and draws the switcher in `SwitchHud.qml`.
+  The switcher opens on the monitor that has focus and stays on it until it
+  closes, so moving focus mid-switch cannot make a card that is already up jump
   to another screen.
 - Switching runs one detached `hyprctl switchxkblayout <keyboard> <index>` per
   typed keyboard. Each device name goes in its own argument, so no shell or
@@ -172,7 +171,7 @@ omarchy-shell jesusarchive.language-switcher list
 Files:
 - `manifest.json`
 - `Service.qml`: the layout state, the switching and the IPC target
-- `SwitchHud.qml`: the switcher and indicator overlays
+- `SwitchHud.qml`: the switcher overlay
 - `Widget.qml`: the bar badge and the Input menu
 - `SourceIcon.qml`: the badge drawing
 - `Model.js`: the pure logic

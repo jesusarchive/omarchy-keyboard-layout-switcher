@@ -21,15 +21,13 @@
     "defaults": {
       "showSourceName": false,
       "showSwitcher": true,
-      "showIndicator": true,
       "hudTimeoutMs": 900,
       "hideWhenSingle": false
     },
     "schema": [
       { "key": "showSourceName", "type": "boolean", "label": "Show input source name", "defaultValue": false, "description": "Show the layout name next to the icon in the bar." },
       { "key": "showSwitcher", "type": "boolean", "label": "Show switcher on Ctrl+Space", "defaultValue": true },
-      { "key": "showIndicator", "type": "boolean", "label": "Show indicator on other switches", "defaultValue": true, "description": "The small badge shown after a menu pick or a scripted switch." },
-      { "key": "hudTimeoutMs", "type": "integer", "label": "Overlay timeout (ms)", "min": 300, "max": 5000, "step": 100, "defaultValue": 900 },
+      { "key": "hudTimeoutMs", "type": "integer", "label": "Switcher timeout (ms)", "min": 300, "max": 5000, "step": 100, "defaultValue": 900 },
       { "key": "hideWhenSingle", "type": "boolean", "label": "Hide with a single layout", "defaultValue": false }
     ]
   }

@@ -36,9 +36,9 @@ const catalog = Model.layoutCatalog(XKB)
 function devices(overrides) {
   return {
     keyboards: [
-      { name: "power-button", layout: "us,es", variant: ",", active_layout_index: 1, capsLock: false },
+      { name: "power-button", layout: "us,es", variant: ",", active_layout_index: 1 },
       { name: "hl-virtual-keyboard-fcitx5", layout: "us", variant: "", active_layout_index: 0 },
-      Object.assign({ name: "at-translated-set-2-keyboard", layout: "us,es", variant: ",", active_layout_index: 0, capsLock: false }, overrides)
+      Object.assign({ name: "at-translated-set-2-keyboard", layout: "us,es", variant: ",", active_layout_index: 0 }, overrides)
     ]
   }
 }
@@ -100,13 +100,11 @@ test("readDevices ignores buttons and virtual keyboards", () => {
   assert.deepStrictEqual(state.keyboards, ["at-translated-set-2-keyboard"])
   assert.strictEqual(state.activeIndex, 0)
   assert.strictEqual(state.sources.length, 2)
-  assert.strictEqual(state.capsLock, false)
 })
 
 test("readDevices reports caps lock and the active layout", () => {
-  const state = Model.readDevices(devices({ active_layout_index: 1, capsLock: true }), catalog, "")
+  const state = Model.readDevices(devices({ active_layout_index: 1 }), catalog, "")
   assert.strictEqual(state.activeIndex, 1)
-  assert.strictEqual(state.capsLock, true)
 })
 
 test("readDevices rejects garbage", () => {

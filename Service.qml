@@ -5,7 +5,7 @@ import Quickshell.Hyprland
 import "Model.js" as Model
 
 // One instance for the whole shell. It owns the layout state, the switching,
-// the IPC target the key bindings call, and the switch overlays. The bar
+// the IPC target the key bindings call, and the switcher overlay. The bar
 // widget, one per monitor, only renders what this exposes.
 Item {
   id: root
@@ -21,14 +21,12 @@ Item {
   property var sources: []
   property int activeIndex: 0
   property var keyboards: []
-  property bool capsLock: false
   property bool loaded: false
   property var recent: []
 
   readonly property var activeSource: sources.length > 0 ? sources[Math.max(0, Math.min(activeIndex, sources.length - 1))] : null
 
   readonly property bool showSwitcher: setting("showSwitcher", true) !== false
-  readonly property bool showIndicator: setting("showIndicator", true) !== false
   readonly property int hudTimeoutMs: intSetting("hudTimeoutMs", 900, 300, 5000)
 
   property var _catalog: ({})
@@ -65,12 +63,11 @@ Item {
     var state = Model.readDevices(text, _catalog, _typedKeyboardName)
     if (!state) return
     keyboards = state.keyboards
-    capsLock = state.capsLock
     if (JSON.stringify(state.sources) !== JSON.stringify(sources)) sources = state.sources
     // A reading that lands right after our own switch can predate it.
     if (!switchGuard.running && state.activeIndex !== activeIndex) {
       activeIndex = state.activeIndex
-      if (!hud.switcherOpen) recent = Model.touchRecent(recent, activeIndex, sources.length)
+      if (!hud.opened) recent = Model.touchRecent(recent, activeIndex, sources.length)
     }
     if (!loaded) {
       loaded = true
@@ -97,23 +94,25 @@ Item {
 
   // Ctrl+Space. The first press goes back to the previously used source and
   // opens the switcher. Each further press while the switcher is still up moves
-  // down the list, so holding Ctrl and tapping Space walks every source.
+  // down the list. Each press restarts the hudTimeoutMs window, so the run ends
+  // when the reader stops pressing. Hyprland reports the press and never the
+  // release, so there is nothing else to end it on.
   function previous() {
     if (sources.length < 2) return "single"
     var target
-    if (hud.switcherOpen) {
+    if (hud.opened) {
       target = Model.nextIndex(activeIndex, sources.length)
     } else {
       _switcherOrigin = activeIndex
       target = Model.previousIndex(recent, activeIndex, sources.length)
     }
     switchTo(target)
-    if (showSwitcher) hud.show("switcher")
+    if (showSwitcher) hud.show()
     else commitSwitcher()
     return activeSource ? activeSource.code : ""
   }
 
-  // Moves to the next source and shows the small indicator.
+  // Steps to the next source in order.
   function next() {
     if (sources.length < 2) return "single"
     select(Model.nextIndex(activeIndex, sources.length))
@@ -124,7 +123,6 @@ Item {
   function select(index) {
     if (!switchTo(index)) return false
     recent = Model.touchRecent(recent, index, sources.length)
-    if (showIndicator) hud.show("indicator")
     return true
   }
 
