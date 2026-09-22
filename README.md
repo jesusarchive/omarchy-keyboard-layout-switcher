@@ -18,16 +18,11 @@ Plugin ID: `jesusarchive.keyboard-layout-switcher`. MIT licensed.
   the source name in the bar, and open Keyboard Settings
   (`~/.config/hypr/input.lua`). Each optional row can be hidden in the plugin
   settings.
-- The keyboard viewer floats above apps and follows the active layout. Click
-  Shift or AltGr to see those symbols, and click a key to type into the focused
-  app. On a physical keyboard, use Shift or Right Alt (AltGr), or both, with the
-  key shown. Accent keys marked in the theme accent color are dead keys: press
-  one and then a letter. Hold an on-screen letter to pick an accented version.
-  Drag the strip above the keys to move the viewer, or
-  close it with the × button. The viewer does not yet track held physical
-  modifiers. Its on-screen Caps key
-  changes only the viewer's letters; it does not change your physical Caps or
-  Compose setting.
+- The keyboard viewer is in beta. It follows the active layout and lets you
+  click keys to type into the focused app. Click Shift or AltGr to see their
+  symbols. Accent keys act as dead keys; hold a letter for accented choices.
+  Drag the strip above the keys to move the viewer. It does not yet track held
+  physical modifiers. Its on-screen Caps key affects only the viewer.
 - Ctrl+Space on its own switches to the most recently used layout and shows
   nothing. Keep Ctrl down instead and the switcher appears, listing every
   layout. Tap Space with Ctrl still down to walk the list, and let go to settle
@@ -36,8 +31,16 @@ Plugin ID: `jesusarchive.keyboard-layout-switcher`. MIT licensed.
 - Every keyboard switches together, so a second keyboard never stays on the old
   layout. The plugin ignores virtual keyboards and ACPI buttons.
 - The badge, the menu and the switcher use Omarchy's menu colors and fonts.
-- A menu pick or a scripted switch shows no overlay. The bar badge changes, and
-  that is the only report.
+- Menu picks and the `set` and `next` commands change the bar badge without an
+  overlay. The `previous` shortcut can show the switcher when Ctrl stays held.
+
+## Shortcut switcher
+
+![The Ctrl+Space switcher listing English and Spanish](shortcut-switcher.png)
+
+## Keyboard viewer (beta)
+
+![The keyboard viewer showing the English (US) layout](keyboard-viewer.png)
 
 ## Install
 
@@ -226,6 +229,7 @@ Files:
 - `Model.js`: the pure logic
 - `tests/`: the node tests
 - `preview.png`: the marketplace preview, also the image above
+- `shortcut-switcher.png` and `keyboard-viewer.png`: README screenshots
 
 ## License
 
