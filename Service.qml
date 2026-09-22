@@ -18,10 +18,13 @@ Item {
   property var layouts: []
   property int activeIndex: 0
   property var keyboards: []
+  property string keyboardModel: ""
+  property string keyboardOptions: ""
   property bool loaded: false
   property var recent: []
 
   readonly property var activeLayout: layouts.length > 0 ? layouts[Math.max(0, Math.min(activeIndex, layouts.length - 1))] : null
+  readonly property bool viewerOpened: viewer.opened
 
   property var _catalog: ({})
   property string _typedKeyboardName: ""
@@ -46,6 +49,8 @@ Item {
     var state = Model.readDevices(text, _catalog, _typedKeyboardName)
     if (!state) return
     keyboards = state.keyboards
+    keyboardModel = state.keyboardModel
+    keyboardOptions = state.keyboardOptions
     if (JSON.stringify(state.layouts) !== JSON.stringify(layouts)) layouts = state.layouts
     // A reading that lands right after our own switch can predate it.
     if (!switchGuard.running && state.activeIndex !== activeIndex) {
@@ -150,6 +155,8 @@ Item {
     return true
   }
 
+  function toggleViewer() { viewer.toggle() }
+
   Component.onCompleted: {
     catalogProc.running = true
   }
@@ -188,6 +195,7 @@ Item {
       }))
     }
     function toggle(): string { return root.toggleMenu() ? "ok" : "no bar widget" }
+    function viewer(): string { root.toggleViewer(); return "ok" }
     function refresh(): string { root.refresh(); return "ok" }
   }
 
@@ -268,5 +276,10 @@ Item {
     service: root
     onSwitcherClosed: root.commitSwitcher()
     onAdvanceRequested: root.advance()
+  }
+
+  KeyboardViewer {
+    id: viewer
+    service: root
   }
 }

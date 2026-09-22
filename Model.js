@@ -150,7 +150,9 @@ function readDevices(json, catalog, namedByEvent) {
   return {
     keyboards: typed.map(function (k) { return String(k.name) }),
     layouts: layouts(keyboard, catalog),
-    activeIndex: keyboard ? (keyboard.active_layout_index || 0) : 0
+    activeIndex: keyboard ? (keyboard.active_layout_index || 0) : 0,
+    keyboardModel: keyboard ? String(keyboard.model || "") : "",
+    keyboardOptions: keyboard ? String(keyboard.options || "") : ""
   }
 }
 

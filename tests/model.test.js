@@ -107,6 +107,12 @@ test("readDevices reports caps lock and the active layout", () => {
   assert.strictEqual(state.activeIndex, 1)
 })
 
+test("readDevices passes the selected keyboard's XKB model and options to the viewer", () => {
+  const state = Model.readDevices(devices({ model: "pc105", options: "compose:caps" }), catalog, "")
+  assert.strictEqual(state.keyboardModel, "pc105")
+  assert.strictEqual(state.keyboardOptions, "compose:caps")
+})
+
 test("readDevices rejects garbage", () => {
   assert.strictEqual(Model.readDevices("", catalog, ""), null)
   assert.strictEqual(Model.readDevices("not json", catalog, ""), null)

@@ -17,6 +17,12 @@
     "category": "Compositor",
     "aliases": ["keyboard", "input", "language", "layout", "input-source"],
     "allowMultiple": false,
-    "defaultSection": "right"
+    "defaultSection": "right",
+    "defaults": {
+      "showSourceName": false
+    },
+    "schema": [
+      { "key": "showSourceName", "type": "boolean", "label": "Show Input Source Name", "defaultValue": false, "description": "Show the keyboard layout name next to the badge in the bar." }
+    ]
   }
 }

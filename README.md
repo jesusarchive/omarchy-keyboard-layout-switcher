@@ -9,10 +9,21 @@ Plugin ID: `jesusarchive.keyboard-layout-switcher`. MIT licensed.
 ![The EN badge in the bar with the layouts menu open, listing English (US) and Spanish](preview.png)
 
 - The bar badge carries the layout's language code from xkb. Hover it for the
-  full name ("Spanish").
+  full name ("Spanish"), or turn on "Show Input Source Name" in the menu to
+  keep the name next to the badge.
 - The layouts menu lists every layout with a ✓ on the active one, then "Show
-  Emoji & Symbols" (Omarchy's emoji picker) and "Open Keyboard Settings…"
-  (`~/.config/hypr/input.lua`).
+  Emoji & Symbols" (Omarchy's emoji picker), "Show Keyboard Viewer", "Show
+  Input Source Name", and "Open Keyboard Settings…" (`~/.config/hypr/input.lua`).
+- The keyboard viewer floats above apps and follows the active layout. Click
+  Shift or AltGr to see those symbols, and click a key to type into the focused
+  app. On a physical keyboard, use Shift or Right Alt (AltGr), or both, with the
+  key shown. Accent keys marked in the theme accent color are dead keys: press
+  one and then a letter. Hold an on-screen letter to pick an accented version.
+  Drag the strip above the keys to move the viewer, or
+  close it with the × button. The viewer does not yet track held physical
+  modifiers. Its on-screen Caps key
+  changes only the viewer's letters; it does not change your physical Caps or
+  Compose setting.
 - Ctrl+Space on its own switches to the most recently used layout and shows
   nothing. Keep Ctrl down instead and the switcher appears, listing every
   layout. Tap Space with Ctrl still down to walk the list, and let go to settle
@@ -42,7 +53,7 @@ rsync -a --delete --exclude .git ./ ~/.config/omarchy/plugins/jesusarchive.keybo
 omarchy plugin enable jesusarchive.keyboard-layout-switcher
 ```
 
-Requirements: `hyprctl` and `xkbcli` (libxkbcommon). Both ship with Omarchy.
+Requirements: `hyprctl`, `xkbcli`, `wtype`, Python 3 and libxkbcommon. All ship with Omarchy.
 
 ### Layouts
 
@@ -98,6 +109,7 @@ Then delete the binding from `bindings.lua`.
 |---|---|
 | Bar: left or right click | open the layouts menu |
 | Menu: click a layout | switch to it |
+| Menu: Show Keyboard Viewer | toggle the floating keyboard map |
 
 Keys while the menu is open:
 
@@ -124,6 +136,7 @@ omarchy-shell jesusarchive.keyboard-layout-switcher set es     # by index, code 
 omarchy-shell jesusarchive.keyboard-layout-switcher current    # prints the active code, e.g. EN
 omarchy-shell jesusarchive.keyboard-layout-switcher list       # JSON of every layout
 omarchy-shell jesusarchive.keyboard-layout-switcher toggle     # open the menu on the focused monitor
+omarchy-shell jesusarchive.keyboard-layout-switcher viewer     # toggle the keyboard viewer
 omarchy-shell jesusarchive.keyboard-layout-switcher refresh
 ```
 
@@ -161,6 +174,8 @@ layout. `set` prints `unknown` for a layout that doesn't exist.
   straight back.
 - `Widget.qml` is the bar badge and menu, one per monitor. It only renders what
   the service exposes.
+- `KeyboardViewer.qml` draws the floating keyboard. `keyboard_viewer.py` reads
+  each key's symbols from libxkbcommon for the active layout and modifiers.
 - `Model.js` holds the parsing and switching logic with no Qt imports, so node
   can test it.
 
@@ -180,6 +195,8 @@ Files:
 - `SwitchHud.qml`: the switcher overlay
 - `Widget.qml`: the bar badge and the layouts menu
 - `LayoutIcon.qml`: the badge drawing
+- `KeyboardViewer.qml`, `keyboard_viewer.py`, and `Typing.js`: the keyboard map,
+  XKB labels, and dead-key composition
 - `Model.js`: the pure logic
 - `tests/`: the node tests
 - `preview.png`: the marketplace preview, also the image above

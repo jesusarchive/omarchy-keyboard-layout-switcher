@@ -4,8 +4,8 @@ import qs.Commons
 import qs.Ui
 
 // The bar icon and the layouts menu. The menu holds the layout icon, a ✓ on the
-// active layout, Emoji & Symbols and Keyboard Settings. Omarchy's panel
-// components draw all of it.
+// active layout, Emoji & Symbols, the name toggle and Keyboard Settings.
+// Omarchy's panel components draw all of it.
 Panel {
   id: root
   moduleName: "jesusarchive.keyboard-layout-switcher"
@@ -17,6 +17,7 @@ Panel {
   readonly property var layouts: svc ? svc.layouts : []
   readonly property int activeIndex: svc ? svc.activeIndex : 0
   readonly property var activeLayout: svc ? svc.activeLayout : null
+  readonly property bool showSourceName: setting("showSourceName", false) === true
   readonly property string screenName: {
     var win = button.QsWindow.window
     return win && win.screen ? String(win.screen.name) : ""
@@ -32,6 +33,9 @@ Panel {
     })
     out.push({ kind: "separator" })
     out.push({ kind: "action", action: "emoji", label: "Show Emoji & Symbols", icon: "" })
+    out.push({ kind: "action", action: "viewer", label: svc && svc.viewerOpened ? "Hide Keyboard Viewer" : "Show Keyboard Viewer", icon: "" })
+    out.push({ kind: "separator" })
+    out.push({ kind: "action", action: "sourceName", label: "Show Input Source Name", checked: showSourceName })
     out.push({ kind: "separator" })
     out.push({ kind: "action", action: "settings", label: "Open Keyboard Settings…" })
     return out
@@ -99,10 +103,24 @@ Panel {
       // moment it appears. Spawning a process puts the summon a few hundred
       // milliseconds later, by which time there is nothing left to dismiss it.
       if (bar) bar.run("omarchy-shell shell toggle omarchy.emojis")
+    } else if (row.action === "sourceName") {
+      close()
+      setShowSourceName(!showSourceName)
+    } else if (row.action === "viewer") {
+      close()
+      svc.toggleViewer()
     } else if (row.action === "settings") {
       close()
       if (bar) bar.run("omarchy-launch-editor " + Util.shellQuote(Quickshell.env("HOME") + "/.config/hypr/input.lua"))
     }
+  }
+
+  function setShowSourceName(value) {
+    if (!bar || !bar.shell || typeof bar.shell.updateEntryInline !== "function") return
+    var next = {}
+    for (var k in settings) next[k] = settings[k]
+    next.showSourceName = value
+    bar.shell.updateEntryInline(pluginId, next)
   }
 
   visible: svc !== null && layouts.length > 0
@@ -147,6 +165,16 @@ Panel {
         fill: root.foreground
         ink: root.bar && !root.bar.transparent ? root.bar.background : Color.background
         fontFamily: root.fontFamily
+      }
+
+      Text {
+        visible: root.showSourceName && root.activeLayout !== null
+        anchors.verticalCenter: parent.verticalCenter
+        textFormat: Text.PlainText
+        text: root.activeLayout ? root.activeLayout.name : ""
+        color: root.foreground
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.body
       }
     }
   }
@@ -225,7 +253,7 @@ Panel {
       readonly property var row: parent ? parent.rowData : null
       readonly property int rowIndex: parent ? parent.rowIndex : -1
       readonly property bool hot: root.cursorActive && root.cursorIndex === rowIndex
-      readonly property bool checked: !!row && row.kind === "layout" && row.index === root.activeIndex
+      readonly property bool checked: !!row && (row.kind === "layout" ? row.index === root.activeIndex : row.checked === true)
       readonly property color textColor: hot ? Color.menu.selectedText : Color.popups.text
 
       implicitHeight: Style.space(28)
