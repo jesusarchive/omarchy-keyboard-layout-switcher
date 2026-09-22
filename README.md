@@ -6,14 +6,18 @@ menu, or bind Ctrl+Space to go straight back to the layout you used before and
 Ctrl+Alt+Space to step forward through them.
 Plugin ID: `jesusarchive.keyboard-layout-switcher`. MIT licensed.
 
-![The EN badge in the bar with the layouts menu open, listing English (US) and Spanish](preview.png)
+![The layouts menu open, listing English (US) and Spanish](preview.png)
 
-- The bar badge carries the layout's language code from xkb. Hover it for the
-  full name ("Spanish"), or turn on "Show Input Source Name" in the menu to
-  keep the name next to the badge.
-- The layouts menu lists every layout with a ✓ on the active one, then "Show
-  Emoji & Symbols" (Omarchy's emoji picker), "Show Keyboard Viewer", "Show
-  Input Source Name", and "Open Keyboard Settings…" (`~/.config/hypr/input.lua`).
+- The bar shows the layout's short language code from xkb (`EN`, `ES`). Choose
+  a filled icon, bordered badge, or plain text in the widget settings. Hover
+  it for the full name ("Spanish"), or turn on "Show Input Source Name" in the
+  menu to keep the name next to the code. The bar shows a keyboard icon while
+  the menu is open.
+- The layouts menu lists every layout with a ✓ on the active one. Its optional
+  rows open Omarchy's Emoji & Symbols picker, show the Keyboard Viewer, toggle
+  the source name in the bar, and open Keyboard Settings
+  (`~/.config/hypr/input.lua`). Each optional row can be hidden in the plugin
+  settings.
 - The keyboard viewer floats above apps and follows the active layout. Click
   Shift or AltGr to see those symbols, and click a key to type into the focused
   app. On a physical keyboard, use Shift or Right Alt (AltGr), or both, with the
@@ -54,6 +58,27 @@ omarchy plugin enable jesusarchive.keyboard-layout-switcher
 ```
 
 Requirements: `hyprctl`, `xkbcli`, `wtype`, Python 3 and libxkbcommon. All ship with Omarchy.
+
+### Bar appearance and menu options
+
+Set `barAppearance` to `icon` (the current filled badge), `bordered` (an outline
+around the code), or `text` (the code alone). The default is `icon`.
+`showSourceName` independently adds the full layout name beside any of these.
+
+The widget settings include a switch for each optional menu row. All four rows
+are shown by default; turn off any of these settings to remove its row:
+
+| Setting | Menu row |
+|---|---|
+| `showEmojiAndSymbols` | Show Emoji & Symbols |
+| `showKeyboardViewer` | Show Keyboard Viewer |
+| `showSourceNameMenuItem` | Show Input Source Name |
+| `showKeyboardSettings` | Open Keyboard Settings… |
+
+The bar name setting still works when its menu row is hidden. If you edit
+`~/.config/omarchy/shell.json` directly, add `barAppearance` or any of these
+keys to the widget's entry. Set menu row keys to `false` to hide them.
+The layout choices and keyboard shortcuts remain available.
 
 ### Layouts
 
@@ -157,9 +182,10 @@ layout. `set` prints `unknown` for a layout that doesn't exist.
 - With two or more layouts the service re-reads the device list every 10
   seconds, because plugging a keyboard in raises no Hyprland event. A
   single-layout install has nothing to switch, so the service skips the poll.
-- Names and codes come from `xkbcli list`, read once at start. `es` becomes
-  "Spanish" and `ES`. Two layouts with the same code (`us` and `us(intl)`) get a
-  variant letter so their badges differ.
+- Names and short language codes come from `xkbcli list`, read once at start.
+  `us` becomes `EN`; `es` becomes `ES` with the name "Spanish". Two entries
+  with the same code (`us` and `us(intl)`) get a variant letter so their
+  badges differ.
 - Ctrl+Space keeps a most-recently-used list, and a run of presses while the
   switcher is up counts as one use.
 - A Ctrl+Space takes the keyboard straight away and draws nothing. That grab is

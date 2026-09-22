@@ -19,10 +19,20 @@
     "allowMultiple": false,
     "defaultSection": "right",
     "defaults": {
-      "showSourceName": false
+      "barAppearance": "icon",
+      "showSourceName": false,
+      "showEmojiAndSymbols": true,
+      "showKeyboardViewer": true,
+      "showSourceNameMenuItem": true,
+      "showKeyboardSettings": true
     },
     "schema": [
-      { "key": "showSourceName", "type": "boolean", "label": "Show Input Source Name", "defaultValue": false, "description": "Show the keyboard layout name next to the badge in the bar." }
+      { "key": "barAppearance", "type": "enum", "label": "Bar Appearance", "options": ["icon", "bordered", "text"], "defaultValue": "icon", "description": "icon uses the current filled layout badge; bordered outlines the code; text shows the code without a badge." },
+      { "key": "showSourceName", "type": "boolean", "label": "Show Input Source Name in Bar", "defaultValue": false, "description": "Show the keyboard layout name next to the badge in the bar." },
+      { "key": "showEmojiAndSymbols", "type": "boolean", "label": "Show Emoji & Symbols in Menu", "defaultValue": true },
+      { "key": "showKeyboardViewer", "type": "boolean", "label": "Show Keyboard Viewer in Menu", "defaultValue": true },
+      { "key": "showSourceNameMenuItem", "type": "boolean", "label": "Show Input Source Name in Menu", "defaultValue": true },
+      { "key": "showKeyboardSettings", "type": "boolean", "label": "Show Keyboard Settings in Menu", "defaultValue": true }
     ]
   }
 }

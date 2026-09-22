@@ -3,8 +3,8 @@ import Quickshell
 import qs.Commons
 import qs.Ui
 
-// The bar icon and the layouts menu. The menu holds the layout icon, a ✓ on the
-// active layout, Emoji & Symbols, the name toggle and Keyboard Settings.
+// The bar icon and the layouts menu. Optional menu actions can be hidden in
+// the widget settings; layout choices always remain available.
 // Omarchy's panel components draw all of it.
 Panel {
   id: root
@@ -18,6 +18,11 @@ Panel {
   readonly property int activeIndex: svc ? svc.activeIndex : 0
   readonly property var activeLayout: svc ? svc.activeLayout : null
   readonly property bool showSourceName: setting("showSourceName", false) === true
+  readonly property string barAppearance: setting("barAppearance", "icon")
+  readonly property bool showEmojiAndSymbols: setting("showEmojiAndSymbols", true) !== false
+  readonly property bool showKeyboardViewer: setting("showKeyboardViewer", true) !== false
+  readonly property bool showSourceNameMenuItem: setting("showSourceNameMenuItem", true) !== false
+  readonly property bool showKeyboardSettings: setting("showKeyboardSettings", true) !== false
   readonly property string screenName: {
     var win = button.QsWindow.window
     return win && win.screen ? String(win.screen.name) : ""
@@ -28,16 +33,27 @@ Panel {
 
   // Menu rows in display order. Keyboard navigation steps over the separators.
   readonly property var rows: {
+    if (layouts.length === 0) return []
     var out = layouts.map(function(s) {
       return { kind: "layout", index: s.index, label: s.name, glyph: s.glyph }
     })
-    out.push({ kind: "separator" })
-    out.push({ kind: "action", action: "emoji", label: "Show Emoji & Symbols", icon: "" })
-    out.push({ kind: "action", action: "viewer", label: svc && svc.viewerOpened ? "Hide Keyboard Viewer" : "Show Keyboard Viewer", icon: "" })
-    out.push({ kind: "separator" })
-    out.push({ kind: "action", action: "sourceName", label: "Show Input Source Name", checked: showSourceName })
-    out.push({ kind: "separator" })
-    out.push({ kind: "action", action: "settings", label: "Open Keyboard Settings…" })
+    var actions = []
+    if (showEmojiAndSymbols)
+      actions.push({ kind: "action", action: "emoji", label: "Show Emoji & Symbols", icon: "" })
+    if (showKeyboardViewer)
+      actions.push({ kind: "action", action: "viewer", label: svc && svc.viewerOpened ? "Hide Keyboard Viewer" : "Show Keyboard Viewer", icon: "" })
+    if (actions.length > 0) {
+      out.push({ kind: "separator" })
+      out = out.concat(actions)
+    }
+    if (showSourceNameMenuItem) {
+      out.push({ kind: "separator" })
+      out.push({ kind: "action", action: "sourceName", label: "Show Input Source Name", checked: showSourceName })
+    }
+    if (showKeyboardSettings) {
+      out.push({ kind: "separator" })
+      out.push({ kind: "action", action: "settings", label: "Open Keyboard Settings…" })
+    }
     return out
   }
 
@@ -158,7 +174,17 @@ Panel {
       anchors.centerIn: parent
       spacing: Style.space(5)
 
+      Text {
+        visible: root.opened
+        anchors.verticalCenter: parent.verticalCenter
+        text: ""
+        color: root.foreground
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.title
+      }
+
       LayoutIcon {
+        visible: !root.opened && root.barAppearance !== "bordered" && root.barAppearance !== "text"
         anchors.verticalCenter: parent.verticalCenter
         size: Style.space(15)
         glyph: root.activeLayout ? root.activeLayout.glyph : ""
@@ -167,8 +193,41 @@ Panel {
         fontFamily: root.fontFamily
       }
 
+      Rectangle {
+        visible: !root.opened && root.barAppearance === "bordered"
+        anchors.verticalCenter: parent.verticalCenter
+        implicitWidth: borderedCode.implicitWidth + Style.space(8)
+        implicitHeight: Style.space(19)
+        radius: Style.space(4)
+        color: "transparent"
+        border.width: 1
+        border.color: root.foreground
+
+        Text {
+          id: borderedCode
+          anchors.centerIn: parent
+          textFormat: Text.PlainText
+          text: root.activeLayout ? root.activeLayout.glyph : ""
+          color: root.foreground
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.body
+          font.bold: true
+        }
+      }
+
       Text {
-        visible: root.showSourceName && root.activeLayout !== null
+        visible: !root.opened && root.barAppearance === "text"
+        anchors.verticalCenter: parent.verticalCenter
+        textFormat: Text.PlainText
+        text: root.activeLayout ? root.activeLayout.glyph : ""
+        color: root.foreground
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.body
+        font.bold: true
+      }
+
+      Text {
+        visible: !root.opened && root.showSourceName && root.activeLayout !== null
         anchors.verticalCenter: parent.verticalCenter
         textFormat: Text.PlainText
         text: root.activeLayout ? root.activeLayout.name : ""
