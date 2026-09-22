@@ -6,7 +6,7 @@ menu, or bind Ctrl+Space to go straight back to the layout you used before and
 Ctrl+Alt+Space to step forward through them.
 Plugin ID: `jesusarchive.keyboard-layout-switcher`. MIT licensed.
 
-![The layouts menu open, listing English (US) and Spanish](preview.png)
+![The keyboard layout menu and bar on an empty Omarchy workspace](preview.png)
 
 - The bar shows the layout's short language code from xkb (`EN`, `ES`). Choose
   a filled icon, bordered badge, or plain text in the widget settings. Hover
