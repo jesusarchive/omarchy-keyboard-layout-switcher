@@ -1,17 +1,16 @@
 # Keyboard Layout Switcher for Omarchy
 
-Click the layout indicator in the [Omarchy](https://omarchy.org) bar to choose a
-keyboard layout. Optional shortcuts switch layouts without opening the menu.
+Choose a keyboard layout from the Omarchy bar. Add shortcuts to switch without
+opening the menu.
 
 ## Bar and menu
 
-The bar shows the active layout as a short language code from xkb, such as `EN`
-or `ES`.
+The bar indicator shows a short code for the active layout.
 
 ![Keyboard layout indicator with the menu closed](bar-closed.png)
 
 Left or right click the indicator to open the menu. The active layout has a
-check mark. Select a layout to switch all connected keyboards together.
+check mark. Choosing a layout switches your keyboards together.
 
 ![Keyboard layout menu open in the Omarchy bar](preview.png)
 
@@ -21,8 +20,8 @@ and an action to open `~/.config/hypr/input.lua` in your editor. Use arrows or
 
 ## Requirements
 
-Omarchy Quattro with shell plugin support. Omarchy includes the tools this plugin
-uses: `hyprctl`, `xkbcli`, `wtype`, Python 3, and libxkbcommon.
+This plugin requires Omarchy Quattro with shell plugin support. Omarchy includes
+the tools it uses: `hyprctl`, `xkbcli`, `wtype`, Python 3, and libxkbcommon.
 
 ## Installation
 
@@ -58,10 +57,9 @@ the next layout in the configured order.
 
 ![Keyboard layout switcher](shortcut-switcher.png)
 
-These chords are unbound in Omarchy by default. A binding for Ctrl+Space will
-take that shortcut away from applications that use it. To choose another chord,
-change the first argument. Use `o.rebind` instead of `o.bind` if that chord is
-already bound.
+Binding Ctrl+Space here takes it away from applications that use it. Change the
+first argument to choose another chord. If that chord is already bound, use
+`o.rebind` instead of `o.bind`.
 
 ## Bar options
 
@@ -79,7 +77,8 @@ omarchy bar set jesusarchive.keyboard-layout-switcher barAppearance bordered
 omarchy bar set jesusarchive.keyboard-layout-switcher showSourceName true --json
 ```
 
-All four extra menu rows appear by default. Set a row's key to `false` to hide it:
+All four optional menu rows appear by default. Set a row's key to `false` to
+hide it:
 
 | Key | Menu row |
 | --- | --- |
@@ -112,7 +111,7 @@ on-screen Caps key changes only the viewer.
 
 ## Commands
 
-The plugin exposes these commands through `omarchy-shell`:
+Run these commands with `omarchy-shell jesusarchive.keyboard-layout-switcher`:
 
 | Command | Action |
 | --- | --- |
