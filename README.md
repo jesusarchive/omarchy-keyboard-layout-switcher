@@ -3,7 +3,21 @@
 Click the layout indicator in the [Omarchy](https://omarchy.org) bar to choose a
 keyboard layout. Optional shortcuts switch layouts without opening the menu.
 
-![Keyboard layout menu in the Omarchy bar](preview.png)
+## Bar and menu
+
+The bar shows the active layout as a short language code from xkb, such as `EN`
+or `ES`.
+
+![Keyboard layout indicator with the menu closed](bar-closed.png)
+
+Left or right click the indicator to open the menu. The active layout has a
+check mark. Select a layout to switch all connected keyboards together.
+
+![Keyboard layout menu open in the Omarchy bar](preview.png)
+
+The menu also includes Emoji & Symbols, a keyboard viewer, a source-name toggle,
+and an action to open `~/.config/hypr/input.lua` in your editor. Use arrows or
+`j`/`k` to move, Enter or Space to select, and Esc to close.
 
 ## Requirements
 
@@ -16,15 +30,7 @@ uses: `hyprctl`, `xkbcli`, `wtype`, Python 3, and libxkbcommon.
 omarchy plugin add https://github.com/jesusarchive/omarchy-keyboard-layout-switcher.git --enable
 ```
 
-The indicator starts in the right section of the bar. To move it:
-
-```bash
-omarchy bar move jesusarchive.keyboard-layout-switcher --section center
-```
-
-## Configuration
-
-### Keyboard layouts
+## Keyboard layouts
 
 The plugin switches between layouts configured in `~/.config/hypr/input.lua`.
 For example:
@@ -36,7 +42,7 @@ kb_variant = ",",
 
 With one layout, the indicator remains visible but there is nothing to switch.
 
-### Shortcuts
+## Shortcuts
 
 The plugin does not install keybindings. Add these to
 `~/.config/hypr/bindings.lua` if you want them:
@@ -57,22 +63,23 @@ take that shortcut away from applications that use it. To choose another chord,
 change the first argument. Use `o.rebind` instead of `o.bind` if that chord is
 already bound.
 
-### Bar and menu
+## Bar options
 
-![Omarchy bar with the keyboard layout menu closed](bar-closed.png)
+The indicator starts in the right section of the bar. To move it:
 
-The bar shows a short language code from xkb, such as `EN` or `ES`. The default
-style is a filled badge. Choose `bordered` for an outline or `text` for plain
-text, and optionally show the full layout name beside it:
+```bash
+omarchy bar move jesusarchive.keyboard-layout-switcher --section center
+```
+
+The default style is a filled badge. Set `barAppearance` to `bordered` for an
+outline or `text` for plain text. `showSourceName` adds the full layout name:
 
 ```bash
 omarchy bar set jesusarchive.keyboard-layout-switcher barAppearance bordered
 omarchy bar set jesusarchive.keyboard-layout-switcher showSourceName true --json
 ```
 
-The menu also offers Emoji & Symbols, the Keyboard Viewer, a source-name toggle,
-and an action that opens `~/.config/hypr/input.lua` in your editor. Hide any of
-those rows by setting its key to `false`:
+All four extra menu rows appear by default. Set a row's key to `false` to hide it:
 
 | Key | Menu row |
 | --- | --- |
@@ -90,13 +97,7 @@ omarchy bar set jesusarchive.keyboard-layout-switcher showKeyboardViewer false -
 Use `--json` for boolean values so Omarchy stores `true` or `false` instead of
 strings.
 
-## Usage
-
-Left or right click the bar indicator to open the menu. Select a layout to
-switch every connected keyboard. The menu supports Omarchy's usual panel keys:
-arrows or `j`/`k` to move, Enter or Space to select, and Esc to close.
-
-### Keyboard viewer (beta)
+## Keyboard viewer (beta)
 
 Choose **Show Keyboard Viewer** from the menu to open a floating keyboard for
 the active layout. Click keys to type into the focused application. The on-screen
@@ -107,9 +108,9 @@ move the viewer, or close it with the × at the top right.
 The viewer is in beta. It does not track held physical modifiers, and its
 on-screen Caps key changes only the viewer.
 
-![Keyboard Viewer showing the English (US) layout](keyboard-viewer.png)
+![Keyboard viewer showing the English (US) layout](keyboard-viewer.png)
 
-### Commands
+## Commands
 
 The plugin exposes these commands through `omarchy-shell`:
 
@@ -121,7 +122,7 @@ The plugin exposes these commands through `omarchy-shell`:
 | `current` | Print the active layout code |
 | `list` | Print layouts as JSON |
 | `toggle` | Open the menu on the focused monitor |
-| `viewer` | Toggle the Keyboard Viewer |
+| `viewer` | Toggle the keyboard viewer |
 | `refresh` | Read the current layout again |
 
 For example:
