@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "author": "jesusarchive",
   "license": "MIT",
-  "description": "Show and switch keyboard layouts from the Omarchy bar.",
+  "description": "Keyboard language switcher for Omarchy.",
   "kinds": ["bar-widget", "service"],
   "entryPoints": {
     "barWidget": "Widget.qml",
@@ -13,7 +13,7 @@
   },
   "barWidget": {
     "displayName": "Keyboard Layout Switcher",
-    "description": "Shows the active layout and opens a layout menu.",
+    "description": "Keyboard language switcher for the Omarchy bar.",
     "category": "Compositor",
     "aliases": ["keyboard", "input", "language", "layout", "input-source"],
     "allowMultiple": false,
