@@ -9,15 +9,13 @@ Plugin ID: `jesusarchive.keyboard-layout-switcher`. MIT licensed.
 ![The keyboard layout menu and bar on an empty Omarchy workspace](preview.png)
 
 - The bar shows the layout's short language code from xkb (`EN`, `ES`). Choose
-  a filled icon, bordered badge, or plain text in the widget settings. Hover
-  it for the full name ("Spanish"), or turn on "Show Input Source Name" in the
-  menu to keep the name next to the code. The bar shows a keyboard icon while
-  the menu is open.
+  a filled icon, bordered badge, or plain text. Hover for the full name
+  ("Spanish"), or turn on "Show Input Source Name" in the menu to keep it beside
+  the code. The bar shows a keyboard icon while the menu is open.
 - The layouts menu lists every layout with a ✓ on the active one. Its optional
   rows open Omarchy's Emoji & Symbols picker, show the Keyboard Viewer, toggle
   the source name in the bar, and open Keyboard Settings
-  (`~/.config/hypr/input.lua`). Each optional row can be hidden in the plugin
-  settings.
+  (`~/.config/hypr/input.lua`). Each optional row can be hidden.
 - The keyboard viewer is in beta. It follows the active layout and lets you
   click keys to type into the focused app. Click Shift or AltGr to see their
   symbols. Accent keys act as dead keys; hold a letter for accented choices.
@@ -30,7 +28,8 @@ Plugin ID: `jesusarchive.keyboard-layout-switcher`. MIT licensed.
 - Ctrl+Alt+Space steps to the next layout in order and shows nothing.
 - Every keyboard switches together, so a second keyboard never stays on the old
   layout. The plugin ignores virtual keyboards and ACPI buttons.
-- The badge, the menu and the switcher use Omarchy's menu colors and fonts.
+- The badge uses the bar colors; the menu and switcher use Omarchy's menu colors
+  and fonts.
 - Menu picks and the `set` and `next` commands change the bar badge without an
   overlay. The `previous` shortcut can show the switcher when Ctrl stays held.
 
@@ -42,7 +41,12 @@ Plugin ID: `jesusarchive.keyboard-layout-switcher`. MIT licensed.
 
 ![The keyboard viewer showing the English (US) layout](keyboard-viewer.png)
 
-## Install
+## Requirements
+
+Omarchy Quattro with shell plugin support. The plugin uses `hyprctl`, `xkbcli`,
+`wtype`, Python 3 and libxkbcommon, which Omarchy includes.
+
+## Installation
 
 ```bash
 omarchy plugin add https://github.com/jesusarchive/omarchy-keyboard-layout-switcher.git --enable
@@ -57,19 +61,25 @@ Manual install from a checkout:
 omarchy plugin validate .
 mkdir -p ~/.config/omarchy/plugins/jesusarchive.keyboard-layout-switcher
 rsync -a --delete --exclude .git ./ ~/.config/omarchy/plugins/jesusarchive.keyboard-layout-switcher/
+omarchy-shell shell rescanPlugins
 omarchy plugin enable jesusarchive.keyboard-layout-switcher
 ```
 
-Requirements: `hyprctl`, `xkbcli`, `wtype`, Python 3 and libxkbcommon. All ship with Omarchy.
+## Configuration
 
 ### Bar appearance and menu options
 
-Set `barAppearance` to `icon` (the current filled badge), `bordered` (an outline
-around the code), or `text` (the code alone). The default is `icon`.
-`showSourceName` independently adds the full layout name beside any of these.
+Set `barAppearance` to `icon` (the default filled badge), `bordered` (an outline),
+or `text` (the code alone). `showSourceName` adds the full layout name beside
+any style. For example:
 
-The widget settings include a switch for each optional menu row. All four rows
-are shown by default; turn off any of these settings to remove its row:
+```bash
+omarchy bar set jesusarchive.keyboard-layout-switcher barAppearance bordered
+omarchy bar set jesusarchive.keyboard-layout-switcher showSourceName true --json
+```
+
+All four optional menu rows appear by default. Set a row's key to `false` to
+hide it:
 
 | Setting | Menu row |
 |---|---|
@@ -78,10 +88,14 @@ are shown by default; turn off any of these settings to remove its row:
 | `showSourceNameMenuItem` | Show Input Source Name |
 | `showKeyboardSettings` | Open Keyboard Settings… |
 
-The bar name setting still works when its menu row is hidden. If you edit
-`~/.config/omarchy/shell.json` directly, add `barAppearance` or any of these
-keys to the widget's entry. Set menu row keys to `false` to hide them.
-The layout choices and keyboard shortcuts remain available.
+```bash
+omarchy bar set jesusarchive.keyboard-layout-switcher showKeyboardViewer false --json
+```
+
+Use `--json` for `true` and `false`; otherwise `omarchy bar set` stores them as
+strings. These settings live on the widget's entry in
+`~/.config/omarchy/shell.json`. Hiding the name toggle leaves the current bar
+name setting intact. The layout choices and keyboard shortcuts remain available.
 
 ### Layouts
 
@@ -118,20 +132,10 @@ keybindings list (Super+K). Omarchy claims neither chord. It uses Super+Space
 for its own menu, so nothing needs unbinding first. Apps that want Ctrl+Space,
 editor completion for example, stop receiving it.
 
-To use other keys, change the first argument, for example `"SUPER + SPACE"`. If
-Omarchy or another plugin already binds the chord you pick, add
-`hl.unbind("SUPER + SPACE")` on the line before, then check with
-`hyprctl configerrors`.
+To use other keys, change the first argument. If the chord is already bound,
+use `o.rebind` in place of `o.bind`, then check `hyprctl configerrors`.
 
-### Remove
-
-```bash
-omarchy plugin remove jesusarchive.keyboard-layout-switcher
-```
-
-Then delete the binding from `bindings.lua`.
-
-## Use
+## Usage
 
 | Where | Action |
 |---|---|
@@ -171,66 +175,30 @@ omarchy-shell jesusarchive.keyboard-layout-switcher refresh
 `previous` and `next` print the new code, or `single` when there's only one
 layout. `set` prints `unknown` for a layout that doesn't exist.
 
-## How it works
+## Updating
 
-- `Service.qml` runs once for the whole shell. It reads `hyprctl -j devices`
-  on start and on every `activelayout` and `configreloaded` event from
-  Hyprland, owns the IPC target, and draws the switcher in `SwitchHud.qml`.
-  The switcher opens on the monitor that has focus and stays on it until it
-  closes, so moving focus mid-switch cannot make a card that is already up jump
-  to another screen.
-- Switching runs one detached `hyprctl switchxkblayout <keyboard> <index>` per
-  typed keyboard. Each device name goes in its own argument, so no shell or
-  batch separator can split it.
-- With two or more layouts the service re-reads the device list every 10
-  seconds, because plugging a keyboard in raises no Hyprland event. A
-  single-layout install has nothing to switch, so the service skips the poll.
-- Names and short language codes come from `xkbcli list`, read once at start.
-  `us` becomes `EN`; `es` becomes `ES` with the name "Spanish". Two entries
-  with the same code (`us` and `us(intl)`) get a variant letter so their
-  badges differ.
-- Ctrl+Space keeps a most-recently-used list, and a run of presses while the
-  switcher is up counts as one use.
-- A Ctrl+Space takes the keyboard straight away and draws nothing. That grab is
-  the only way to learn that the modifier came back up, because a Hyprland
-  binding reports the press and never the release. A release inside
-  a quarter of a second ends the run having shown nothing, and the switch has
-  already happened. Past that, the switcher appears.
-- While it is up, Space reaches the switcher directly and the switcher walks the
-  list, so a binding that fires for the same press is dropped. If the grab never
-  takes, the binding drives the list as before and the switcher closes after
-  five seconds of silence. Any key that is not Space hands the keyboard
-  straight back.
-- `Widget.qml` is the bar badge and menu, one per monitor. It only renders what
-  the service exposes.
-- `KeyboardViewer.qml` draws the floating keyboard. `keyboard_viewer.py` reads
-  each key's symbols from libxkbcommon for the active layout and modifiers.
-- `Model.js` holds the parsing and switching logic with no Qt imports, so node
-  can test it.
+Update a GitHub installation with:
+
+```bash
+omarchy plugin update jesusarchive.keyboard-layout-switcher
+```
+
+## Removal
+
+```bash
+omarchy plugin remove jesusarchive.keyboard-layout-switcher
+```
+
+Remove any bindings you added to `~/.config/hypr/bindings.lua`.
 
 ## Development
 
 ```bash
-node --test tests/*.test.js               # model tests
-omarchy plugin validate .                 # manifest check
-rsync -a --delete --exclude .git ./ ~/.config/omarchy/plugins/jesusarchive.keyboard-layout-switcher/
-omarchy restart shell                     # QML changes need a restart to show up
-omarchy-shell jesusarchive.keyboard-layout-switcher list
+node --test tests/*.test.js
+qmllint -I /usr/share/omarchy/shell *.qml
+omarchy plugin validate .
 ```
-
-Files:
-- `manifest.json`
-- `Service.qml`: the layout state, the switching and the IPC target
-- `SwitchHud.qml`: the switcher overlay
-- `Widget.qml`: the bar badge and the layouts menu
-- `LayoutIcon.qml`: the badge drawing
-- `KeyboardViewer.qml`, `keyboard_viewer.py`, and `Typing.js`: the keyboard map,
-  XKB labels, and dead-key composition
-- `Model.js`: the pure logic
-- `tests/`: the node tests
-- `preview.png`: the marketplace preview, also the image above
-- `shortcut-switcher.png` and `keyboard-viewer.png`: README screenshots
 
 ## License
 
-MIT
+[MIT](LICENSE)
