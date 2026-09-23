@@ -1,10 +1,7 @@
 # Keyboard Layout Switcher for Omarchy
 
-A keyboard layout menu for the [Omarchy](https://omarchy.org) bar. The bar shows
-the active keyboard layout as a small badge (`EN`, `ES`). Click it for the layouts
-menu, or bind Ctrl+Space to go straight back to the layout you used before and
-Ctrl+Alt+Space to step forward through them.
-Plugin ID: `jesusarchive.keyboard-layout-switcher`. MIT licensed.
+Choose a keyboard layout from the [Omarchy](https://omarchy.org) bar, or switch
+with optional keyboard shortcuts.
 
 ![The keyboard layout menu and bar on an empty Omarchy workspace](preview.png)
 
