@@ -1,8 +1,7 @@
 import QtQuick
 import qs.Commons
 
-// The keyboard layout icon. It draws a filled rounded square and knocks the
-// layout's letters out of it, in the theme's colors and font.
+// Filled layout badge in the bar's colors and font.
 Item {
   id: root
 
@@ -17,8 +16,7 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    // Follows the theme's rounding, but a sharp square no longer reads as
-    // a layout badge, so keep a small radius at least.
+    // Keep a minimum radius when the theme uses square corners.
     radius: Math.max(Math.round(root.size * 0.2), Math.min(Style.cornerRadius, root.size * 0.3))
     color: root.fill
   }

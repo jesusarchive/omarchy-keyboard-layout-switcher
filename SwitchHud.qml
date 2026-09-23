@@ -5,55 +5,30 @@ import Quickshell.Wayland
 import qs.Commons
 import qs.Ui
 
-// The Ctrl+Space switcher: a list of layout names with the current one boxed.
-// This follows Omarchy's own overlays (emojis, clipboard, reminders). It is a
-// full-screen layer holding a centred card that draws from the [menu] surface
-// tokens. There is no scrim and no input, because the card only reports.
-//
-// A menu pick and a scripted switch show nothing. The bar badge already names
-// the layout, and it is the thing the reader clicked or typed at.
-//
-// While the card is up it takes the keyboard, so it can watch for the modifier
-// coming back up and close on that rather than on a timer. A Hyprland bind only
-// ever reports the press, but a layer surface with exclusive focus is handed
-// the Key_Control release. The card owns the Space key for as long as it holds
-// the keyboard, so a bind that still reaches the service is ignored there.
-//
-// The card lands on the monitor that has focus, the same one `toggleMenu`
-// opens the layouts menu on. Omarchy's OSD leaves this unbound and stays put,
-// which on two monitors means reading a switch on the screen you are not
-// typing on.
+// Ctrl+Space switcher on the focused monitor. The card uses Omarchy's menu
+// colors. Its layer grabs the keyboard to detect Ctrl release and repeated
+// Space presses; Hyprland bindings only report key presses.
 Item {
   id: root
 
   required property var service
 
-  // Live, meaning the card holds the keyboard and the run is in progress. It
-  // says nothing about whether anything is drawn.
+  // The keyboard grab can start before the card becomes visible.
   property bool opened: false
-  // Drawn. A tap that is over before switcherDelayMs never gets here, so
-  // Ctrl+Space on its own switches in silence.
+  // A quick Ctrl+Space tap ends before the card is revealed.
   property bool revealed: false
 
-  // How long the keyboard has to stay down before the card is worth drawing.
-  // Shorter than this and the reader is going back to the last layout, not
-  // reading a list.
+  // Delay the card so a quick switch has no overlay.
   readonly property int switcherDelayMs: 250
   readonly property bool grabbing: opened
-  // When a key last reached the card, as milliseconds since the epoch. The
-  // service reads it to tell its own duplicate from a real press: a bind that
-  // fires for the same Space lands a shell and a qs client later, so it is the
-  // one that arrives just after a key. A bind firing with no key before it is
-  // the only signal there is, and has to be acted on.
+  // The service uses this timestamp to reject a duplicate binding call.
   property double lastKeyAt: 0
 
   function sawKeyRecently(ms) {
     return lastKeyAt > 0 && (Date.now() - lastKeyAt) < ms
   }
 
-  // How long the card waits with the keyboard and nothing arriving. Only a
-  // release that never came can get this far, so it is a safety net, not the
-  // mechanism.
+  // Close if the modifier release never arrives.
   readonly property int grabIdleMs: 5000
 
   signal advanceRequested()
@@ -64,9 +39,7 @@ Item {
       || key === Qt.Key_AltGr
   }
 
-  // The output the card sits on. Captured when it opens rather than bound to
-  // the focused monitor, so moving focus mid-switch cannot make a card that is
-  // already on screen jump to another monitor.
+  // Capture the monitor at open time so the card does not move mid-switch.
   property var targetScreen: null
 
   function focusedScreen() {
@@ -78,7 +51,7 @@ Item {
     return list.length > 0 ? list[0] : null
   }
 
-  // Same tokens as the Omarchy menu, so themes that style it style this.
+  // Use the same theme colors and fonts as Omarchy menus.
   property color background: Color.menu.background
   property color foreground: Color.menu.text
   property color border: Color.menu.border
@@ -92,14 +65,10 @@ Item {
 
   signal switcherClosed()
 
-  // Assigned, not bound. A binding on focusedScreen() would follow the focused
-  // monitor and move a card that is already up.
+  // Assign once; a binding would move the card when focus changes.
   Component.onCompleted: targetScreen = focusedScreen()
 
-  // Arms the run. Whether anything appears is up to the modifier: the card is
-  // drawn once switcherDelayMs passes with the keyboard still held, and a
-  // release before that closes the run having shown nothing. Without the grab
-  // there is nothing to wait for, so it draws at once.
+  // Start the keyboard grab. The reveal timer controls card visibility.
   function show() {
     if (!opened) { targetScreen = focusedScreen(); lastKeyAt = 0 }
     opened = true
@@ -142,16 +111,14 @@ Item {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: root.grabbing ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     exclusionMode: ExclusionMode.Ignore
-    // The card only reports, so it must never take a click from the window
-    // underneath it. The keyboard is a different matter; see the grab above.
+    // Let pointer events pass through to the window below.
     mask: Region {}
 
     Item {
       anchors.fill: parent
       focus: true
 
-      // Space walks the list. Anything else means the reader has moved on, so
-      // give the keyboard straight back rather than swallowing their typing.
+      // Space advances the list. Other non-modifier keys close the grab.
       Keys.onPressed: function(event) {
         root.lastKeyAt = Date.now()
         hideTimer.restart()
@@ -163,8 +130,7 @@ Item {
         event.accepted = true
       }
 
-      // The release the whole grab exists for. Qt still reports Control in
-      // `modifiers` here, so the key itself is what to read.
+      // Qt still includes Control in modifiers on release; inspect the key.
       Keys.onReleased: function(event) {
         root.lastKeyAt = Date.now()
         if (root.isModifier(event.key)) root.close()
@@ -221,8 +187,7 @@ Item {
               color: current ? root.selectedBackground : "transparent"
               borderSpec: current ? root.selectedBorderSpec : Border.none()
 
-              // The name alone. The icon belongs on the bar, where one layout
-              // has to be read at a glance. A list is read by reading it.
+              // Show full layout names in the switcher.
               Text {
                 id: nameText
                 anchors.centerIn: parent

@@ -102,7 +102,7 @@ test("readDevices ignores buttons and virtual keyboards", () => {
   assert.strictEqual(state.layouts.length, 2)
 })
 
-test("readDevices reports caps lock and the active layout", () => {
+test("readDevices reports the active layout", () => {
   const state = Model.readDevices(devices({ active_layout_index: 1 }), catalog, "")
   assert.strictEqual(state.activeIndex, 1)
 })
@@ -191,7 +191,7 @@ test("switchCommands moves every keyboard with one argv each", () => {
   ])
 })
 
-test("switchCommands keeps a hostile device name in one argument", () => {
+test("switchCommands keeps special characters in one argument", () => {
   assert.deepStrictEqual(Model.switchCommands(["evil; dispatch exit"], 0), [
     ["hyprctl", "switchxkblayout", "evil; dispatch exit", "0"]
   ])

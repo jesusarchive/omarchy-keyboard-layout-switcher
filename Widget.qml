@@ -3,9 +3,8 @@ import Quickshell
 import qs.Commons
 import qs.Ui
 
-// The bar icon and the layouts menu. Optional menu actions can be hidden in
-// the widget settings; layout choices always remain available.
-// Omarchy's panel components draw all of it.
+// Bar indicator and layouts menu. Bar settings can hide optional actions;
+// layout choices stay available.
 Panel {
   id: root
   moduleName: "jesusarchive.keyboard-layout-switcher"
@@ -31,7 +30,7 @@ Panel {
   readonly property color foreground: bar ? bar.foreground : Color.foreground
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
 
-  // Menu rows in display order. Keyboard navigation steps over the separators.
+  // Menu rows in display order. Keyboard navigation skips separators.
   readonly property var rows: {
     if (layouts.length === 0) return []
     var out = layouts.map(function(s) {
@@ -58,9 +57,7 @@ Panel {
   }
 
   property int cursorIndex: 0
-  // Omarchy's panels keep the highlight hidden until a key asks for it, then
-  // the first press only reveals it where it already sits. Hovering a row
-  // reveals it too. Closing hides it again.
+  // Hide the initial highlight until keyboard navigation or hover begins.
   property bool cursorActive: false
 
   function attachService() {
@@ -75,8 +72,7 @@ Panel {
   Component.onCompleted: attachService()
   Component.onDestruction: if (svc) svc.unregisterMenuHost(root)
 
-  // The service loads alongside the widget, and a plugin reload rebuilds it,
-  // so keep looking until it answers. A destroyed one reads back as null.
+  // The service can become available after this widget loads or reloads.
   Timer {
     interval: 400
     repeat: true
@@ -85,8 +81,7 @@ Panel {
   }
 
   onOpenedChanged: if (opened) {
-    // Open on the active layout, so the first j or k moves from where the
-    // reader is rather than from the top of the menu.
+    // Start keyboard navigation at the active layout.
     cursorIndex = actionable(activeIndex) ? activeIndex : 0
     cursorActive = false
     if (svc) svc.refresh()
@@ -113,11 +108,8 @@ Panel {
       close()
     } else if (row.action === "emoji") {
       close()
-      // Out through `omarchy-shell` rather than straight to the host. Calling
-      // the host here summons the picker in the same frame this menu closes,
-      // and this menu handing the keyboard back dismisses the picker again the
-      // moment it appears. Spawning a process puts the summon a few hundred
-      // milliseconds later, by which time there is nothing left to dismiss it.
+      // Launch after closing: opening the picker in this frame makes the menu's
+      // focus release dismiss it immediately.
       if (bar) bar.run("omarchy-shell shell toggle omarchy.emojis")
     } else if (row.action === "sourceName") {
       close()
@@ -153,12 +145,10 @@ Panel {
     labelVisible: false
     fixedWidth: iconRow.implicitWidth + Style.space(12)
     tooltipText: root.opened || !root.activeLayout ? "" : root.activeLayout.name
-    // Either button opens the menu. A right click used to switch straight to
-    // the next layout, which meant the same gesture did different things here
-    // and on every other bar widget.
+    // Both mouse buttons open the menu, like other bar widgets.
     onPressed: root.toggle()
 
-    // The pressed-in look the bar item takes on while its menu is open.
+    // Indicate that the menu is open.
     Rectangle {
       anchors.centerIn: parent
       width: iconRow.implicitWidth + Style.space(8)
@@ -255,8 +245,7 @@ Panel {
       id: keyCatcher
       anchors.fill: parent
 
-      // PanelKeyCatcher owns the key map, so h/j/k/l, the arrows, Enter,
-      // Space, Tab and Esc behave here exactly as in every Omarchy panel.
+      // Use Omarchy's shared panel key bindings.
       onMoveRequested: function(dx, dy) {
         if (!root.cursorActive) { root.cursorActive = true; return }
         root.moveCursor(dy !== 0 ? dy : dx)
@@ -332,7 +321,7 @@ Panel {
         x: Style.space(6)
         spacing: Style.space(6)
 
-        // The ✓ column, blank on every row but the active layout.
+        // Mark the active layout and checked options.
         Text {
           width: Style.space(14)
           anchors.verticalCenter: parent.verticalCenter

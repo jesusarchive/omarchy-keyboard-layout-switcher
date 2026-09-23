@@ -4,15 +4,14 @@ import Quickshell.Io
 import Quickshell.Hyprland
 import "Model.js" as Model
 
-// One instance for the whole shell. It owns the layout state, the switching,
-// the IPC target the key bindings call, and the switcher overlay. The bar
-// widget, one per monitor, only renders what this exposes.
+// One service for layout state, switching, IPC, and the switcher overlay.
+// Bar widgets read this state on each monitor.
 Item {
   id: root
 
   readonly property string pluginId: "jesusarchive.keyboard-layout-switcher"
 
-  // The host fills these in.
+  // Set by the shell host.
   property var shell: null
   property var manifest: null
   property var layouts: []
@@ -29,8 +28,7 @@ Item {
   property var _catalog: ({})
   property string _typedKeyboardName: ""
   property bool _refreshPending: false
-  // Where the switcher started, so a run of presses adds one
-  // most-recently-used entry rather than one per press.
+  // Track the starting layout so a switcher run updates recent history once.
   property int _switcherOrigin: -1
   property var _menuHosts: []
 
@@ -52,7 +50,7 @@ Item {
     keyboardModel = state.keyboardModel
     keyboardOptions = state.keyboardOptions
     if (JSON.stringify(state.layouts) !== JSON.stringify(layouts)) layouts = state.layouts
-    // A reading that lands right after our own switch can predate it.
+    // Ignore stale reads immediately after a switch.
     if (!switchGuard.running && state.activeIndex !== activeIndex) {
       activeIndex = state.activeIndex
       if (!hud.opened) recent = Model.touchRecent(recent, activeIndex, layouts.length)
@@ -65,10 +63,8 @@ Item {
 
   // -------------------------------------------------------------- switching
 
-  // Detached argv rather than a Process. A Process that is already running
-  // can't be re-run, so Quickshell would discard a second Ctrl+Space that
-  // arrived inside the first switch. activeIndex has already moved by then, so
-  // the badge would name a layout nobody is on.
+  // A running Process cannot be started again. Detached commands allow another
+  // switch before the previous command exits.
   function switchTo(index) {
     if (index < 0 || index >= layouts.length || keyboards.length === 0) return false
     if (index !== activeIndex) {
@@ -80,16 +76,9 @@ Item {
     return true
   }
 
-  // Ctrl+Space. The first press goes back to the previously used layout and
-  // opens the switcher. Each further press moves down the list, and the run
-  // ends when the modifier comes back up.
-  //
-  // Once the card holds the keyboard, Space reaches the card directly and the
-  // card does the moving. A bind that still fires would then move the list
-  // twice for one press, so drop the one that follows a key the card just saw.
-  // A call with no key before it is the only signal there is, whether the grab
-  // never took or the reader is driving this over IPC, so that one goes
-  // through. `advanceGuard` covers the press where the two could cross.
+  // Ctrl+Space switches to the last used layout. Further presses cycle while
+  // Ctrl is held. The overlay handles Space during its keyboard grab; ignore
+  // duplicate binding calls that arrive just after it handles a key.
   function previous() {
     if (layouts.length < 2) return "single"
     if (advanceGuard.running || (hud.grabbing && hud.sawKeyRecently(400)))
@@ -106,7 +95,7 @@ Item {
     return activeLayout ? activeLayout.code : ""
   }
 
-  // Space, arriving at the card rather than through the bind.
+  // Space handled by the overlay instead of the Hyprland binding.
   function advance() {
     if (layouts.length < 2) return
     advanceGuard.restart()
@@ -121,7 +110,7 @@ Item {
     return activeLayout ? activeLayout.code : ""
   }
 
-  // Handles a direct pick from the menu or the IPC target.
+  // Direct selection from the menu or IPC.
   function select(index) {
     if (!switchTo(index)) return false
     recent = Model.touchRecent(recent, index, layouts.length)
@@ -136,8 +125,7 @@ Item {
 
   // -------------------------------------------------------------- menu hosts
 
-  // Each bar widget registers so `toggle` can open the menu on the monitor
-  // that has focus.
+  // Choose the bar widget on the focused monitor for IPC menu toggles.
   function registerMenuHost(host) {
     if (_menuHosts.indexOf(host) === -1) _menuHosts = _menuHosts.concat([host])
   }
@@ -166,7 +154,7 @@ Item {
     function onRawEvent(event) {
       if (!event || !event.name) return
       var name = String(event.name)
-      // activelayout and the newer activelayoutv2 both name the keyboard first.
+      // Both activelayout event variants name the keyboard first.
       if (name.indexOf("activelayout") === 0) {
         var named = Model.eventKeyboardName(event.data)
         if (named) root._typedKeyboardName = named
@@ -199,8 +187,7 @@ Item {
     function refresh(): string { root.refresh(); return "ok" }
   }
 
-  // xkb's own names for every layout, so "es" gives "Spanish". This only
-  // changes when the xkb data package gets an upgrade, so read it once.
+  // Read layout names from xkb once at startup.
   Process {
     id: catalogProc
     command: ["xkbcli", "list", "--load-exotic"]
@@ -228,10 +215,7 @@ Item {
     }
   }
 
-  // A reading that never comes back would freeze the badge until the shell
-  // restarts, since a Process that is already running can't be re-run. Drop one
-  // that overstays so the next refresh gets through, then ask again. The
-  // reading it never delivered may have been the only one due.
+  // Cancel a stalled device read so later refreshes can run, then retry.
   Timer {
     id: stallTimer
     interval: 5000
@@ -247,10 +231,8 @@ Item {
     onTriggered: root.refresh()
   }
 
-  // Plugging a keyboard in raises no Hyprland event, so a stale list would
-  // leave that keyboard on the old layout whichever way the switch runs. Poll
-  // whenever switching is possible at all. A single-layout install has nothing
-  // to switch, so it skips the poll rather than spawning hyprctl forever.
+  // Hyprland sends no keyboard-added event here. Poll when multiple layouts
+  // are configured so newly connected keyboards join later switches.
   Timer {
     interval: 10000
     repeat: true
@@ -264,8 +246,7 @@ Item {
     onTriggered: root.refresh()
   }
 
-  // The card's key beats the bind's IPC by the time it takes to spawn a shell
-  // and a qs client, so this only has to outlast that.
+  // Suppress the duplicate binding call that follows a grabbed Space key.
   Timer {
     id: advanceGuard
     interval: 250

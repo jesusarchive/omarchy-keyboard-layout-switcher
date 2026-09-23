@@ -1,8 +1,7 @@
-// Pure logic for the keyboard layout switcher, with no Qt imports so node can test it.
+// Layout parsing and switching logic, with no Qt imports.
 
-// Devices Hyprland reports as keyboards that nobody types on: fcitx5's virtual
-// keyboard and the ACPI buttons. They carry the layout list too, so reading or
-// switching them would describe a button instead of the keyboard.
+// Hyprland lists virtual keyboards and ACPI buttons alongside physical keyboards.
+// Exclude them from layout reads and switches.
 var UNTYPED_KEYBOARDS = /^(hl-virtual-keyboard|power-button|sleep-button|lid-switch|video-bus)/
 
 function isTypedKeyboard(name) {
@@ -49,15 +48,15 @@ function splitList(value) {
   return String(value === undefined || value === null ? "" : value).split(",")
 }
 
-// The short label for a layout is xkb's language code, so us becomes EN, and
-// both es and latam become ES. A layout xkb has no brief for keeps its own name.
+// Use xkb's brief language code: us becomes EN; es and latam both become ES.
+// Fall back to the layout identifier when xkb has no brief code.
 function shortCode(layout, variant, catalog) {
   var entry = (catalog || {})[catalogKey(layout, variant)] || (catalog || {})[layout]
   var code = entry && entry.brief ? entry.brief.split("-")[0] : String(layout || "").split("-")[0]
   return code.substring(0, 3).toUpperCase()
 }
 
-// The letters drawn inside the layout icon.
+// The badge fits at most two letters.
 function iconGlyph(layout) {
   if (!layout) return ""
   return layout.code.length > 2 ? layout.code.substring(0, 2) : layout.code
@@ -69,12 +68,8 @@ function layoutName(layout, variant, catalog) {
   return variant ? layout + " (" + variant + ")" : layout
 }
 
-// Two badges must never read the same. A layout whose code another layout
-// already holds takes a variant letter instead, so us and us(intl) become EN
-// and ENI. If another layout holds that letter too, this tries the rest of the
-// variant, then the layout's position in the list. This walks the list in order and
-// records every code it hands out, so rewriting one layout can never produce a
-// code that another layout already has.
+// Give layouts with the same code distinct labels. Try letters from the variant,
+// then the layout's position: us and us(intl) become EN and ENI.
 function disambiguate(list) {
   var taken = {}
   list.forEach(function (layout) {
@@ -119,13 +114,8 @@ function layouts(keyboard, catalog) {
   return out
 }
 
-// Picks the keyboard being typed on, in order of how much the answer is worth
-// trusting. The one the last activelayout event named knows it just changed.
-// Failing that, Hyprland marks one device `main`, which is the one it routes
-// typing to. The furthest-advanced reading is the last resort, and it is a
-// guess: a laptop reports several devices carrying the same layout list, so
-// without `main` a headphone jack or a row of extra buttons can answer for the
-// keyboard.
+// Prefer the last device named by an activelayout event, then Hyprland's main
+// keyboard. The highest active index is a fallback when neither is available.
 function selectKeyboard(typed, namedByEvent) {
   var keyboards = typed || []
   if (keyboards.length === 0) return null
@@ -211,10 +201,8 @@ function resolveLayout(layoutList, query) {
   return -1
 }
 
-// One hyprctl argv per typed keyboard, so a second keyboard doesn't stay on the
-// old layout. These are separate argv vectors rather than one `hyprctl --batch`
-// string. Batch splits its argument on ";" and has no quoting, so a device name
-// that held a semicolon or a space would run as a command of its own.
+// Run one command per typed keyboard. hyprctl --batch splits on semicolons
+// without shell quoting, so passing a device name through it would be unsafe.
 function switchCommands(keyboards, index) {
   return (keyboards || []).map(function (name) {
     return ["hyprctl", "switchxkblayout", String(name), String(index)]
