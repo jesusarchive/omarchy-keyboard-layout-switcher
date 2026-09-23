@@ -59,6 +59,8 @@ already bound.
 
 ### Bar and menu
 
+![Omarchy bar with the keyboard layout menu closed](bar-closed.png)
+
 The bar shows a short language code from xkb, such as `EN` or `ES`. The default
 style is a filled badge. Choose `bordered` for an outline or `text` for plain
 text, and optionally show the full layout name beside it:
