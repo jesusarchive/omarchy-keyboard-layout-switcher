@@ -144,7 +144,6 @@ Panel {
     hasVisualContent: root.activeLayout !== null
     labelVisible: false
     fixedWidth: iconRow.implicitWidth + Style.space(12)
-    tooltipText: root.opened || !root.activeLayout ? "" : root.activeLayout.name
     // Both mouse buttons open the menu, like other bar widgets.
     onPressed: root.toggle()
 
