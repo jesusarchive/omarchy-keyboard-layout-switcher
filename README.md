@@ -30,10 +30,31 @@ The menu also has these items:
 - **Open Keyboard Settings…** opens `~/.config/hypr/input.lua` in your editor.
 
 Use the arrow keys or `j`/`k` to move through the menu, Enter to select, and
-Esc to close. The bar editor has settings to change the icon style and hide
-menu items.
+Esc to close.
 
 ![Bar icon and layout name while the menu is open](bar-source-name.png)
+
+## Settings
+
+Change these in the bar editor.
+
+| Setting | Key | Default | Effect |
+| --- | --- | --- | --- |
+| Bar Appearance | `barAppearance` | `icon` | `icon` is a filled icon, `bordered` an outlined one, `text` plain text |
+| Show Input Source Name in Bar | `showSourceName` | `false` | Shows the full layout name next to the bar icon |
+| Show Emojis in Menu | `showEmojiAndSymbols` | `true` | Shows the **Show Emojis** item |
+| Show Keyboard Viewer in Menu | `showKeyboardViewer` | `true` | Shows the **Show Keyboard Viewer** item |
+| Show Input Source Name in Menu | `showSourceNameMenuItem` | `true` | Shows the **Show Input Source Name** item |
+| Show Keyboard Settings in Menu | `showKeyboardSettings` | `true` | Shows the **Open Keyboard Settings…** item |
+| Keyboard Viewer Shape | `keyboardViewerGeometry` | `auto` | Key arrangement in the viewer: `auto`, `ansi`, `iso`, `abnt` or `jis` |
+
+You can also set them from a terminal. Pass `--json` for `true` and `false`,
+or the value is saved as text and ignored:
+
+```bash
+omarchy bar set jesusarchive.keyboard-layout-switcher barAppearance bordered
+omarchy bar set jesusarchive.keyboard-layout-switcher showEmojiAndSymbols false --json
+```
 
 ## Shortcuts
 
