@@ -1,9 +1,9 @@
 # Keyboard Layout Switcher
 
-Pick a keyboard layout from the Omarchy bar. The plugin reads the layouts in
-`~/.config/hypr/input.lua`, shows the active one, and switches all connected
-keyboards together. A shortcut switcher and clickable keyboard viewer are
-available when you want them.
+Switch keyboard layouts from the Omarchy bar. The plugin reads
+`~/.config/hypr/input.lua`, shows the active layout, and switches all connected
+keyboards together. It also provides an optional shortcut switcher and a
+clickable keyboard viewer.
 
 ![Keyboard layout menu with English and Spanish](preview.png)
 
@@ -23,8 +23,10 @@ The plugin starts in the right section of the bar.
 ## Use the bar
 
 Click the layout icon to open the menu, then choose a layout. The active layout
-has a check mark. The menu also opens Emoji & Symbols and
-`~/.config/hypr/input.lua` in your editor. It can show a keyboard viewer too.
+has a check mark. **Show Emojis** opens Omarchy's built-in Emojis plugin. The
+menu can also open `~/.config/hypr/input.lua` in your editor and show the
+keyboard viewer.
+
 Use the arrow keys or `j`/`k` to move through the menu, Enter or Space to
 select, and Esc to close.
 
@@ -58,8 +60,7 @@ different combination if you need it there.
 
 ## Show the keyboard viewer
 
-The viewer is in beta and appears in the menu by default. Choose
-**Show Keyboard Viewer**, or run
+The viewer appears in the menu by default. Choose **Show Keyboard Viewer**, or run
 `omarchy-shell jesusarchive.keyboard-layout-switcher viewer`. The viewer opens
 on the focused screen. Click a key to type into the focused application.
 
@@ -73,7 +74,8 @@ on the focused screen. Click a key to type into the focused application.
 - Drag the header to move the viewer and the bottom-right corner to resize it.
   Use the × in the header to close it.
 
-The viewer chooses an ANSI, ISO, ABNT, or JIS keyboard from the active layout.
+The viewer chooses an ANSI, ISO, ABNT, or JIS shape from the active layout and
+keyboard model. You can override the shape in the bar settings.
 It does not highlight physical key presses. Its Caps Lock starts in sync with
 your keyboard, then changes only the viewer. With Hyprland's default
 `follow_mouse`, crossing another window on the way to the viewer can move
@@ -88,18 +90,17 @@ need `--json` so Omarchy stores a boolean rather than a string.
 | --- | --- | --- |
 | `barAppearance` | `icon` | Closed bar icon: `icon`, `bordered`, or `text` |
 | `showSourceName` | `false` | Show the full name beside the bar icon |
-| `showEmojiAndSymbols` | `true` | Show the emoji menu row |
+| `showEmojiAndSymbols` | `true` | Show Omarchy's Emojis picker in the menu; the key retains its old name for existing settings |
 | `showKeyboardViewer` | `true` | Show the viewer menu row |
-| `keyboardViewerGeometry` | `auto` | Viewer shape: `auto`, `ansi`, `iso`, `abnt`, or `jis` |
 | `showSourceNameMenuItem` | `true` | Show the source-name toggle |
 | `showKeyboardSettings` | `true` | Show the input settings action |
+| `keyboardViewerGeometry` | `auto` | Advanced: physical viewer shape override (`ansi`, `iso`, `abnt`, or `jis`) |
 
 For example:
 
 ```bash
 omarchy bar set jesusarchive.keyboard-layout-switcher showSourceName true --json
 omarchy bar set jesusarchive.keyboard-layout-switcher keyboardViewerGeometry iso
-omarchy bar move jesusarchive.keyboard-layout-switcher --section center
 ```
 
 ## Commands
@@ -115,7 +116,6 @@ Run commands with `omarchy-shell jesusarchive.keyboard-layout-switcher`:
 | `list` | Print layouts as JSON |
 | `toggle` | Toggle the bar menu |
 | `viewer` | Toggle the keyboard viewer |
-| `refresh` | Read the current layout again |
 
 ## Update or remove
 

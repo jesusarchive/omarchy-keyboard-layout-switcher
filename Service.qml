@@ -189,7 +189,6 @@ Item {
     }
     function toggle(): string { return root.toggleMenu() ? "ok" : "no bar widget" }
     function viewer(): string { root.toggleViewer(); return "ok" }
-    function refresh(): string { root.refresh(); return "ok" }
   }
 
   // Read layout names from xkb once at startup.

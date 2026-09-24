@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "jesusarchive.keyboard-layout-switcher",
   "name": "Keyboard Layout Switcher",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "jesusarchive",
   "license": "MIT",
   "description": "Pick keyboard layouts from the Omarchy bar, with optional shortcuts and a clickable keyboard viewer.",
@@ -30,11 +30,11 @@
     "schema": [
       { "key": "barAppearance", "type": "enum", "label": "Bar Appearance", "options": ["icon", "bordered", "text"], "defaultValue": "icon", "description": "Show the layout icon, an outlined code, or plain text while the menu is closed." },
       { "key": "showSourceName", "type": "boolean", "label": "Show Input Source Name in Bar", "defaultValue": false, "description": "Show the full input source name beside the layout or keyboard icon." },
-      { "key": "showEmojiAndSymbols", "type": "boolean", "label": "Show Emoji & Symbols in Menu", "defaultValue": true },
+      { "key": "showEmojiAndSymbols", "type": "boolean", "label": "Show Emojis in Menu", "defaultValue": true, "description": "Open Omarchy's built-in Emojis picker from the layout menu." },
       { "key": "showKeyboardViewer", "type": "boolean", "label": "Show Keyboard Viewer in Menu", "defaultValue": true, "description": "Show a menu item that opens the clickable keyboard viewer." },
-      { "key": "keyboardViewerGeometry", "type": "enum", "label": "Keyboard Viewer Shape", "options": ["auto", "ansi", "iso", "abnt", "jis"], "defaultValue": "auto", "description": "The physical keyboard the viewer draws. Auto uses JIS for Japanese, ABNT for Brazilian, ANSI for US and ISO otherwise." },
       { "key": "showSourceNameMenuItem", "type": "boolean", "label": "Show Input Source Name in Menu", "defaultValue": true },
-      { "key": "showKeyboardSettings", "type": "boolean", "label": "Show Keyboard Settings in Menu", "defaultValue": true }
+      { "key": "showKeyboardSettings", "type": "boolean", "label": "Show Keyboard Settings in Menu", "defaultValue": true },
+      { "key": "keyboardViewerGeometry", "type": "enum", "label": "Keyboard Viewer Shape (Advanced)", "options": ["auto", "ansi", "iso", "abnt", "jis"], "defaultValue": "auto", "description": "Override the viewer's physical key shape if Auto does not match your keyboard." }
     ]
   }
 }

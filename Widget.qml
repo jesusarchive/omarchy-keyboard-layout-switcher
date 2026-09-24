@@ -18,7 +18,7 @@ Panel {
   readonly property var activeLayout: svc ? svc.activeLayout : null
   readonly property bool showSourceName: setting("showSourceName", false) === true
   readonly property string barAppearance: setting("barAppearance", "icon")
-  readonly property bool showEmojiAndSymbols: setting("showEmojiAndSymbols", true) !== false
+  readonly property bool showEmojis: setting("showEmojiAndSymbols", true) !== false
   readonly property bool showKeyboardViewer: setting("showKeyboardViewer", true) !== false
   readonly property string keyboardViewerGeometry: setting("keyboardViewerGeometry", "auto")
   readonly property bool showSourceNameMenuItem: setting("showSourceNameMenuItem", true) !== false
@@ -38,8 +38,8 @@ Panel {
       return { kind: "layout", index: s.index, label: s.name, glyph: s.glyph }
     })
     var actions = []
-    if (showEmojiAndSymbols)
-      actions.push({ kind: "action", action: "emoji", label: "Show Emoji & Symbols", icon: "" })
+    if (showEmojis)
+      actions.push({ kind: "action", action: "emoji", label: "Show Emojis", icon: "" })
     if (showKeyboardViewer)
       actions.push({ kind: "action", action: "viewer", label: svc && svc.viewerOpened ? "Hide Keyboard Viewer" : "Show Keyboard Viewer", icon: "" })
     if (actions.length > 0) {
@@ -231,6 +231,12 @@ Panel {
 
   // --------------------------------------------------------- layouts menu
 
+  FontMetrics {
+    id: labelMetrics
+    font.family: root.fontFamily
+    font.pixelSize: Style.font.body
+  }
+
   KeyboardPanel {
     id: panel
     anchorItem: button
@@ -239,7 +245,15 @@ Panel {
     open: root.opened
     focusTarget: keyCatcher
     padding: Style.space(6)
-    contentWidth: panel.fittedContentWidth(Style.space(260))
+    readonly property real widestLabelWidth: root.rows.reduce(function(widest, row) {
+      return Math.max(widest, labelMetrics.advanceWidth(row.label || ""))
+    }, 0)
+    readonly property bool hasActions: root.rows.some(function(row) { return row.kind === "action" })
+    readonly property real labelReserve: Style.space(76)
+    readonly property real horizontalInset: padding * 2 + Border.left(borderSpec) + Border.right(borderSpec)
+    // Fit ordinary labels, but keep rare long XKB names from making a huge menu.
+    contentWidth: panel.fittedContentWidth(Math.min(Style.space(340), Math.max(
+      hasActions ? Style.space(260) : Style.space(200), widestLabelWidth + labelReserve + Style.space(8) + horizontalInset)))
     contentHeight: panel.fittedContentHeight(menuColumn.implicitHeight)
 
     PanelKeyCatcher {
@@ -358,6 +372,8 @@ Panel {
           anchors.verticalCenter: parent.verticalCenter
           textFormat: Text.PlainText
           text: rowItem.row ? rowItem.row.label : ""
+          width: Math.min(implicitWidth, Math.max(0, menuColumn.width - panel.labelReserve))
+          elide: Text.ElideRight
           color: rowItem.textColor
           font.family: root.fontFamily
           font.pixelSize: Style.font.body
