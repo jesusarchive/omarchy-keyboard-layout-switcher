@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "author": "jesusarchive",
   "license": "MIT",
-  "description": "Choose an input source from the Omarchy bar, switch with a shortcut, and optionally use a clickable keyboard viewer.",
+  "description": "Pick keyboard layouts from the Omarchy bar, with optional shortcuts and a clickable keyboard viewer.",
   "kinds": ["bar-widget", "service"],
   "entryPoints": {
     "barWidget": "Widget.qml",
@@ -13,7 +13,7 @@
   },
   "barWidget": {
     "displayName": "Keyboard Layout Switcher",
-    "description": "Shows the active input source. Open the menu to switch layouts or launch the keyboard viewer.",
+    "description": "Shows the active keyboard layout. Click to choose another.",
     "category": "Compositor",
     "aliases": ["keyboard", "input", "language", "layout", "input-source"],
     "allowMultiple": false,
