@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
@@ -20,15 +19,8 @@ Item {
   // Shift, Caps, AltGr, shortcut modifiers and a pending dead key; see Typing.js.
   property var typing: Typing.initialState(false)
 
-  // Keymaps from keyboard_viewer.py, cached by signature so switching layouts
-  // never blanks the keys.
-  property var keymaps: ({})
-  property var keymap: null
-  property string errorText: ""
-  property var loadQueue: []
-  property string loadingSignature: ""
-  property bool loadStreamDone: false
-  property bool loadExited: false
+  readonly property var keymap: keymapLoader.keymap
+  readonly property string errorText: keymapLoader.errorText
 
   property var typeQueue: []
   property var activeCommand: []
@@ -48,10 +40,9 @@ Item {
 
   readonly property var shown: Typing.displayState(typing)
   readonly property var activeLayout: service.activeLayout
-  readonly property string signature: signatureFor(activeLayout)
+  readonly property string signature: keymapLoader.signature
   readonly property string geometryName: ViewerLayout.geometryFor(service.viewerGeometry,
     activeLayout ? activeLayout.layout : "", service.keyboardModel)
-  readonly property string scriptPath: decodeURIComponent(String(Qt.resolvedUrl("keyboard_viewer.py")).replace(/^file:\/\//, ""))
 
   readonly property real screenWidth: targetScreen ? targetScreen.width : panel.width
   readonly property real screenHeight: targetScreen ? targetScreen.height : panel.height
@@ -65,10 +56,6 @@ Item {
     LCTL: "ctrl", LWIN: "super", LALT: "alt", SPCE: " ",
     LEFT: "◀", UP: "▲", DOWN: "▼", RGHT: "▶"
   })
-
-  function signatureFor(layout) {
-    return layout ? [layout.layout, layout.variant, service.keyboardModel, service.keyboardOptions].join("\u0000") : ""
-  }
 
   function focusedScreen() {
     var wanted = Hyprland.focusedMonitor ? String(Hyprland.focusedMonitor.name) : ""
@@ -84,7 +71,6 @@ Item {
     closeAccents()
     opened = true
     placeCard()
-    load()
     // Sync the physical Caps Lock state.
     service.refresh()
   }
@@ -98,7 +84,7 @@ Item {
   onSignatureChanged: {
     typing = Typing.press(null, typing, "ESC", 0).state
     closeAccents()
-    if (opened) load()
+    stopRepeat()
   }
 
   Connections {
@@ -111,85 +97,13 @@ Item {
     }
   }
 
-  // ------------------------------------------------------------ keymaps
-
-  function load() {
-    if (!activeLayout) return
-    if (keymaps[signature]) {
-      keymap = keymaps[signature]
-      errorText = ""
-    } else {
-      enqueue(activeLayout, true)
-    }
-    // Load the other configured layouts in the background.
-    service.layouts.forEach(function(layout) { enqueue(layout, false) })
-  }
-
-  function enqueue(layout, first) {
-    var sig = signatureFor(layout)
-    if (keymaps[sig] || sig === loadingSignature) return
-    var rest = loadQueue.filter(function(job) { return job.signature !== sig })
-    var job = { signature: sig, layout: layout.layout, variant: layout.variant }
-    loadQueue = first ? [job].concat(rest) : rest.concat([job])
-    startNextLoad()
-  }
-
-  function startNextLoad() {
-    if (keymapProc.running || loadingSignature !== "" || loadQueue.length === 0) return
-    var job = loadQueue[0]
-    loadQueue = loadQueue.slice(1)
-    loadingSignature = job.signature
-    loadStreamDone = false
-    loadExited = false
-    keymapProc.command = ["python3", "-B", scriptPath, job.layout, job.variant,
-      service.keyboardModel, service.keyboardOptions]
-    keymapProc.running = true
-  }
-
-  function keymapRead(text) {
-    loadStreamDone = true
-    try {
-      var parsed = JSON.parse(text)
-      var next = Object.assign({}, keymaps)
-      next[loadingSignature] = parsed
-      keymaps = next
-      if (loadingSignature === signature) {
-        keymap = parsed
-        errorText = ""
-      }
-    } catch (e) {}
-    finishLoad()
-  }
-
-  function finishLoad() {
-    if (!loadStreamDone || !loadExited) return
-    if (loadingSignature === signature && !keymaps[signature])
-      errorText = "Could not read this keyboard layout"
-    loadingSignature = ""
-    startNextLoad()
-  }
-
-  Process {
-    id: keymapProc
-    stdout: StdioCollector {
-      waitForEnd: true
-      onStreamFinished: root.keymapRead(text)
-    }
-    onRunningChanged: if (!running) {
-      root.loadExited = true
-      // A process that never started has no output to wait for.
-      streamTimeout.restart()
-      root.finishLoad()
-    }
-  }
-
-  Timer {
-    id: streamTimeout
-    interval: 500
-    onTriggered: if (!root.loadStreamDone && root.loadExited) {
-      root.loadStreamDone = true
-      root.finishLoad()
-    }
+  KeymapLoader {
+    id: keymapLoader
+    active: root.opened
+    layout: root.activeLayout
+    layouts: root.service.layouts
+    keyboardModel: root.service.keyboardModel
+    keyboardOptions: root.service.keyboardOptions
   }
 
   // ------------------------------------------------------------- typing
@@ -213,6 +127,7 @@ Item {
   }
 
   function act(id) {
+    if (!keymapLoader.ready) return { state: typing, commands: [] }
     var result = Typing.press(keymap, typing, id, Date.now())
     typing = result.state
     result.commands.forEach(queueType)
@@ -289,6 +204,7 @@ Item {
   }
 
   function chooseAccent(text) {
+    if (!keymapLoader.ready) return
     var result = Typing.choose(typing, text)
     typing = result.state
     result.commands.forEach(queueType)
@@ -319,6 +235,7 @@ Item {
   }
 
   function enabledFor(id) {
+    if (!keymapLoader.ready) return false
     if (!isLayoutKey(id)) return true
     var current = keyEntry(id)
     return !!current && !!current.keysym
@@ -469,122 +386,26 @@ Item {
           Repeater {
             model: card.placed.keys
 
-            Item {
+            KeyboardKey {
               id: cap
               required property var modelData
               readonly property string keyId: modelData.id
-              readonly property bool isL: modelData.cutW > 0
-              // The L-shaped Enter has two mouse areas; either one counts.
-              readonly property bool hovered: live && anyArea("containsMouse")
-              readonly property bool down: live && anyArea("pressed")
-
-              function anyArea(property) {
-                for (var i = 0; i < areas.count; i++) {
-                  var area = areas.itemAt(i)
-                  if (area && area[property]) return true
-                }
-                return false
-              }
-              readonly property bool live: root.enabledFor(keyId)
-              readonly property int latch: root.latchFor(keyId)
-              readonly property bool armed: root.typing.deadId === keyId && root.typing.dead !== ""
-              readonly property bool layoutKey: root.isLayoutKey(keyId)
-              readonly property string label: root.labelFor(keyId)
-              readonly property string alternate: layoutKey && Typing.showsAlternates(root.typing)
+              geometry: modelData
+              pitch: card.pitch
+              live: root.enabledFor(keyId)
+              latched: root.latchFor(keyId) > 0
+              locked: root.latchFor(keyId) === Typing.LOCKED
+              armed: root.typing.deadId === keyId && root.typing.dead !== ""
+              layoutKey: root.isLayoutKey(keyId)
+              label: root.labelFor(keyId)
+              alternate: layoutKey && Typing.showsAlternates(root.typing)
                 ? Typing.alternateLabel(root.keymap, keyId, root.shown) : ""
-              readonly property bool deadKey: layoutKey && !Typing.isChord(root.typing)
+              deadKey: layoutKey && !Typing.isChord(root.typing)
                 && Typing.isDeadKey(root.keymap, keyId, root.shown)
-
-              // Latched modifiers have an accent outline. Locked modifiers
-              // have an accent fill. Dead keys keep the outline.
-              readonly property bool locked: latch === Typing.LOCKED
-              readonly property color faceColor: !live ? Util.alpha(Color.menu.text, 0.04)
-                : locked ? Util.alpha(Color.accent, 0.38)
-                : down ? Util.alpha(Color.menu.text, 0.34)
-                : armed ? Util.alpha(Color.accent, 0.22)
-                : hovered ? Util.alpha(Color.menu.text, 0.2)
-                : Util.alpha(Color.menu.text, 0.1)
-              readonly property color edgeColor: latch > 0 || armed ? Color.accent
-                : hovered || down ? Util.alpha(Color.menu.text, 0.9)
-                : deadKey ? Color.accent
-                : Util.alpha(Color.menu.text, live ? 0.32 : 0.14)
-              readonly property bool strongEdge: hovered || down || latch > 0 || armed || deadKey
-              readonly property color inkColor: Util.alpha(Color.menu.text, live ? 1 : 0.3)
-
-              x: modelData.x
-              y: modelData.y
-              width: modelData.w
-              height: modelData.h
-
-              KeyFace {
-                id: face
-                anchors.fill: parent
-                lShape: cap.isL
-                cutW: cap.modelData.cutW
-                cutY: cap.modelData.cutY
-                fill: cap.faceColor
-                edge: cap.edgeColor
-                edgeWidth: cap.strongEdge ? 1.5 : 1
-              }
-
-              Item {
-                // The L-shaped Enter centers its label on the full-height column.
-                x: cap.isL ? cap.modelData.cutW : 0
-                width: parent.width - x
-                height: parent.height
-
-                Text {
-                  anchors.centerIn: parent
-                  anchors.horizontalCenterOffset: cap.alternate ? card.pitch * 0.1 : 0
-                  anchors.verticalCenterOffset: cap.alternate ? card.pitch * 0.08 : 0
-                  width: parent.width - Style.space(4)
-                  horizontalAlignment: Text.AlignHCenter
-                  elide: Text.ElideRight
-                  text: cap.label
-                  textFormat: Text.PlainText
-                  color: cap.inkColor
-                  font.family: "Noto Sans"
-                  font.pixelSize: Math.max(8, Math.round(card.pitch * (cap.layoutKey ? 0.36 : cap.label.length > 2 ? 0.22 : 0.3)))
-                }
-
-                Text {
-                  visible: cap.alternate.length > 0
-                  x: Math.round(card.pitch * 0.1)
-                  y: Math.round(card.pitch * 0.04)
-                  text: cap.alternate
-                  textFormat: Text.PlainText
-                  color: Util.alpha(Color.menu.text, 0.65)
-                  font.family: "Noto Sans"
-                  font.pixelSize: Math.max(8, Math.round(card.pitch * 0.22))
-                }
-              }
-
-              Repeater {
-                id: areas
-                model: cap.modelData.rects
-
-                MouseArea {
-                  required property var modelData
-                  x: modelData.x
-                  y: modelData.y
-                  width: modelData.w
-                  height: modelData.h
-                  hoverEnabled: true
-                  enabled: cap.live
-                  pressAndHoldInterval: 450
-                  cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                  onPressedChanged: {
-                    if (pressed) root.pressKey(cap.keyId)
-                    else root.releaseKey(cap.keyId)
-                  }
-                  onCanceled: root.releaseKey(cap.keyId)
-                  onPressAndHold: function(mouse) { root.holdKey(cap.keyId, face, mouse) }
-                  onClicked: root.clickKey(cap.keyId)
-                  // Qt suppresses onClicked for the second click. Repeating
-                  // keys already act on press; other keys need this second act.
-                  onDoubleClicked: root.clickKey(cap.keyId)
-                }
-              }
+              onKeyPressed: root.pressKey(keyId)
+              onKeyReleased: root.releaseKey(keyId)
+              onKeyClicked: root.clickKey(keyId)
+              onKeyHeld: function(mouse) { root.holdKey(keyId, cap, mouse) }
             }
           }
         }
@@ -701,56 +522,6 @@ Item {
             }
           }
         }
-      }
-    }
-  }
-
-  // A key face: a rounded rectangle, or the L-shaped ISO Enter.
-  component KeyFace: Item {
-    id: keyFace
-    property bool lShape: false
-    property real cutW: 0
-    property real cutY: 0
-    property color fill: "transparent"
-    property color edge: "transparent"
-    property real edgeWidth: 1
-    readonly property real radius: Math.max(3, Math.min(Style.space(6), width * 0.1))
-
-    Behavior on fill { ColorAnimation { duration: 70 } }
-    Behavior on edge { ColorAnimation { duration: 70 } }
-
-    Rectangle {
-      visible: !keyFace.lShape
-      anchors.fill: parent
-      radius: keyFace.radius
-      color: keyFace.fill
-      border.width: keyFace.edgeWidth
-      border.color: keyFace.edge
-    }
-
-    Shape {
-      visible: keyFace.lShape
-      anchors.fill: parent
-      preferredRendererType: Shape.CurveRenderer
-
-      ShapePath {
-        readonly property real r: keyFace.radius
-        readonly property real inset: keyFace.edgeWidth / 2
-        fillColor: keyFace.fill
-        strokeColor: keyFace.edgeWidth > 0 ? keyFace.edge : "transparent"
-        strokeWidth: keyFace.edgeWidth
-        startX: r; startY: inset
-        PathLine { x: keyFace.width - keyFace.radius; y: keyFace.edgeWidth / 2 }
-        PathArc { x: keyFace.width - keyFace.edgeWidth / 2; y: keyFace.radius; radiusX: keyFace.radius; radiusY: keyFace.radius }
-        PathLine { x: keyFace.width - keyFace.edgeWidth / 2; y: keyFace.height - keyFace.radius }
-        PathArc { x: keyFace.width - keyFace.radius; y: keyFace.height - keyFace.edgeWidth / 2; radiusX: keyFace.radius; radiusY: keyFace.radius }
-        PathLine { x: keyFace.cutW + keyFace.radius; y: keyFace.height - keyFace.edgeWidth / 2 }
-        PathArc { x: keyFace.cutW + keyFace.edgeWidth / 2; y: keyFace.height - keyFace.radius; radiusX: keyFace.radius; radiusY: keyFace.radius }
-        PathLine { x: keyFace.cutW + keyFace.edgeWidth / 2; y: keyFace.cutY - keyFace.edgeWidth / 2 }
-        PathLine { x: keyFace.radius; y: keyFace.cutY - keyFace.edgeWidth / 2 }
-        PathArc { x: keyFace.edgeWidth / 2; y: keyFace.cutY - keyFace.radius; radiusX: keyFace.radius; radiusY: keyFace.radius }
-        PathLine { x: keyFace.edgeWidth / 2; y: keyFace.radius }
-        PathArc { x: keyFace.radius; y: keyFace.edgeWidth / 2; radiusX: keyFace.radius; radiusY: keyFace.radius }
       }
     }
   }

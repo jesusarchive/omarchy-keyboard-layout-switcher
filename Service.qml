@@ -69,12 +69,12 @@ Item {
   // switch before the previous command exits.
   function switchTo(index) {
     if (index < 0 || index >= layouts.length || keyboards.length === 0) return false
-    if (index !== activeIndex) {
-      var commands = Model.switchCommands(keyboards, index)
-      for (var i = 0; i < commands.length; i++) Quickshell.execDetached(commands[i])
-      activeIndex = index
-      switchGuard.restart()
-    }
+    // The selected layout may already match while another keyboard differs.
+    // Synchronize every device; select() and commitSwitcher() own history.
+    var commands = Model.switchCommands(keyboards, index)
+    for (var i = 0; i < commands.length; i++) Quickshell.execDetached(commands[i])
+    activeIndex = index
+    switchGuard.restart()
     return true
   }
 

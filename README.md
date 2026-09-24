@@ -1,17 +1,9 @@
 # Keyboard Layout Switcher
 
-Switch keyboard layouts from the Omarchy bar or a shortcut, and type from a
-clickable on-screen keyboard. Every connected keyboard switches together.
+Keyboard layout switcher and interactive keyboard viewer for
+[Omarchy Quattro](https://omarchy.org/).
 
-![Keyboard layout menu](preview.png)
-
-## Requirements
-
-- Omarchy Quattro
-- Two or more layouts in `kb_layout` in `~/.config/hypr/input.lua`
-
-The plugin uses `hyprctl`, `xkbcli`, `python3` and `wtype`. Omarchy installs
-all four by default.
+![Layout menu](preview.png)
 
 ## Install
 
@@ -19,95 +11,101 @@ all four by default.
 omarchy plugin add https://github.com/jesusarchive/omarchy-keyboard-layout-switcher.git --enable
 ```
 
-## Use
+Uses `hyprctl`, `xkbcli`, `python3`, and `wtype`, included with Omarchy.
 
-Click the bar icon and choose a layout. A check mark shows the active layout.
-The menu also has these items:
+## Configuration
 
-- **Show Emojis** opens Omarchy's Emojis picker.
-- **Show Keyboard Viewer** opens the [keyboard viewer](#keyboard-viewer).
-- **Show Input Source Name** adds the full layout name next to the bar icon.
-- **Open Keyboard Settings…** opens `~/.config/hypr/input.lua` in your editor.
+Reads keyboard layouts from `~/.config/hypr/input.lua`:
 
-Use the arrow keys or `j`/`k` to move through the menu, Enter to select, and
-Esc to close.
+```lua
+hl.config({
+  input = {
+    kb_layout = "us,es",
+  },
+})
+```
 
-![Bar icon and layout name while the menu is open](bar-source-name.png)
+Select a layout from the bar menu to switch all detected keyboards.
 
-## Settings
-
-Change these in the bar editor.
-
-| Setting | Key | Default | Effect |
-| --- | --- | --- | --- |
-| Bar Appearance | `barAppearance` | `icon` | `icon` is a filled icon, `bordered` an outlined one, `text` plain text |
-| Show Input Source Name in Bar | `showSourceName` | `false` | Shows the full layout name next to the bar icon |
-| Show Emojis in Menu | `showEmojiAndSymbols` | `true` | Shows the **Show Emojis** item |
-| Show Keyboard Viewer in Menu | `showKeyboardViewer` | `true` | Shows the **Show Keyboard Viewer** item |
-| Show Input Source Name in Menu | `showSourceNameMenuItem` | `true` | Shows the **Show Input Source Name** item |
-| Show Keyboard Settings in Menu | `showKeyboardSettings` | `true` | Shows the **Open Keyboard Settings…** item |
-| Keyboard Viewer Shape | `keyboardViewerGeometry` | `auto` | Key arrangement in the viewer: `auto`, `ansi`, `iso`, `abnt` or `jis` |
-
-You can also set them from a terminal. Pass `--json` for `true` and `false`,
-or the value is saved as text and ignored:
+Appearance and menu options are available in the bar editor. For configuration
+from the terminal, see the keys in [manifest.json](manifest.json):
 
 ```bash
 omarchy bar set jesusarchive.keyboard-layout-switcher barAppearance bordered
-omarchy bar set jesusarchive.keyboard-layout-switcher showEmojiAndSymbols false --json
+omarchy bar set jesusarchive.keyboard-layout-switcher showSourceName true --json
 ```
 
 ## Shortcuts
 
-Add these bindings to `~/.config/hypr/bindings.lua`:
+Add to `~/.config/hypr/bindings.lua`:
 
 ```lua
 o.bind("CTRL + SPACE", "Previous keyboard layout", "omarchy-shell jesusarchive.keyboard-layout-switcher previous")
 o.bind("CTRL + ALT + SPACE", "Next keyboard layout", "omarchy-shell jesusarchive.keyboard-layout-switcher next")
 ```
 
-Tap Ctrl+Space to return to the last layout. Keep Ctrl held and press Space to
-cycle through layouts. Ctrl+Alt+Space moves to the next layout. Change the keys
-if they conflict with your apps.
+Ctrl+Space switches to the previously used layout. Hold Ctrl and press Space
+again to cycle through the switcher. Ctrl+Alt+Space selects the next layout in
+configuration order.
 
-![Layout switcher on screen](shortcut-switcher.png)
-
-Scripts can call these commands too:
-
-```bash
-omarchy-shell jesusarchive.keyboard-layout-switcher set <layout>   # by layout name, code or index
-omarchy-shell jesusarchive.keyboard-layout-switcher current        # prints the active layout code
-omarchy-shell jesusarchive.keyboard-layout-switcher list           # prints all layouts as JSON
-omarchy-shell jesusarchive.keyboard-layout-switcher toggle         # opens or closes the menu
-omarchy-shell jesusarchive.keyboard-layout-switcher viewer         # opens or closes the keyboard viewer
-```
+![Shortcut switcher](shortcut-switcher.png)
 
 ## Keyboard viewer
 
-Choose **Show Keyboard Viewer** from the menu. The viewer shows the active
-layout, and each click types into the app that has keyboard focus.
+Choose **Show Keyboard Viewer** from the bar menu. Clicking a key types into the
+focused app.
 
 ![Keyboard viewer](keyboard-viewer.png)
 
-- Click Shift, Ctrl, Alt, Super or AltGr to apply it to the next key.
-  Double-click to lock it, and click again to turn it off. Caps Lock toggles
-  letter case.
-- Click an outlined accent key, then a letter, to type the accented letter.
-  Hold a letter to pick from its accented forms.
-- Drag the header to move the viewer. Drag the bottom-right corner to resize
-  it. Click × to close it.
+Click a modifier to apply it to the next key; double-click to lock it. Click again
+to release it. Dead keys compose with the next letter, and holding a letter opens
+its accent alternatives.
 
-The viewer does not highlight keys you press on your physical keyboard. If its
-key layout does not match your keyboard, change **Keyboard Viewer Shape** in
-the bar editor.
+The viewer supports ANSI, ISO, ABNT, and JIS arrangements. Override the automatic
+selection with **Keyboard shape** in the bar editor. Physical key presses are
+not highlighted.
 
-## Update or remove
+## Commands
+
+```bash
+omarchy-shell jesusarchive.keyboard-layout-switcher <command>
+```
+
+| Command | Description |
+| --- | --- |
+| `previous` | Switch to the previously used layout and start the shortcut switcher |
+| `next` | Select the next layout |
+| `set <layout>` | Select by XKB identifier, layout code, or zero-based index |
+| `current` | Print the current layout code |
+| `list` | Print configured layouts and the active selection as JSON |
+| `toggle` | Toggle the bar menu on the focused monitor |
+| `viewer` | Toggle the keyboard viewer |
+
+Quote variant identifiers, for example `set 'us(intl)'`.
+
+## Update
 
 ```bash
 omarchy plugin update jesusarchive.keyboard-layout-switcher
+```
+
+## Remove
+
+```bash
 omarchy plugin remove jesusarchive.keyboard-layout-switcher
 ```
 
-If you added the shortcuts, remove them from `~/.config/hypr/bindings.lua`.
+Remove any bindings you added to `~/.config/hypr/bindings.lua`.
+
+## Development
+
+Run from the repository root on Omarchy with Node.js installed:
+
+```bash
+node --test tests/*.test.js
+python3 -B -m unittest discover -s tests -p 'test_*.py'
+omarchy plugin validate .
+```
 
 ## License
 

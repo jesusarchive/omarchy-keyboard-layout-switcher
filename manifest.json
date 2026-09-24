@@ -5,18 +5,27 @@
   "version": "0.2.1",
   "author": "jesusarchive",
   "license": "MIT",
-  "description": "Switch keyboard layouts from the Omarchy bar or a shortcut, and type from a clickable on-screen keyboard.",
+  "description": "Keyboard layout switcher and interactive keyboard viewer for Omarchy Quattro.",
   "homepage": "https://github.com/jesusarchive/omarchy-keyboard-layout-switcher",
-  "kinds": ["bar-widget", "service"],
+  "kinds": [
+    "bar-widget",
+    "service"
+  ],
   "entryPoints": {
     "barWidget": "Widget.qml",
     "service": "Service.qml"
   },
   "barWidget": {
     "displayName": "Keyboard Layout Switcher",
-    "description": "Shows the active keyboard layout. Click it to switch layouts or open the keyboard viewer.",
+    "description": "Current keyboard layout and layout selection menu.",
     "category": "Compositor",
-    "aliases": ["keyboard", "input", "language", "layout", "input-source"],
+    "aliases": [
+      "keyboard",
+      "input",
+      "language",
+      "layout",
+      "input-source"
+    ],
     "allowMultiple": false,
     "defaultSection": "right",
     "defaults": {
@@ -29,13 +38,62 @@
       "showKeyboardSettings": true
     },
     "schema": [
-      { "key": "barAppearance", "type": "enum", "label": "Bar Appearance", "options": ["icon", "bordered", "text"], "defaultValue": "icon", "description": "Show the layout code as a filled icon, an outlined icon, or plain text." },
-      { "key": "showSourceName", "type": "boolean", "label": "Show Input Source Name in Bar", "defaultValue": false, "description": "Show the full layout name next to the bar icon." },
-      { "key": "showEmojiAndSymbols", "type": "boolean", "label": "Show Emojis in Menu", "defaultValue": true, "description": "Add a menu item that opens Omarchy's Emojis picker." },
-      { "key": "showKeyboardViewer", "type": "boolean", "label": "Show Keyboard Viewer in Menu", "defaultValue": true, "description": "Add a menu item that opens the clickable keyboard viewer." },
-      { "key": "showSourceNameMenuItem", "type": "boolean", "label": "Show Input Source Name in Menu", "defaultValue": true, "description": "Add a menu item that toggles the layout name in the bar." },
-      { "key": "showKeyboardSettings", "type": "boolean", "label": "Show Keyboard Settings in Menu", "defaultValue": true, "description": "Add a menu item that opens ~/.config/hypr/input.lua in your editor." },
-      { "key": "keyboardViewerGeometry", "type": "enum", "label": "Keyboard Viewer Shape (Advanced)", "options": ["auto", "ansi", "iso", "abnt", "jis"], "defaultValue": "auto", "description": "The key arrangement the viewer draws. Auto picks one from your layout and keyboard model." }
+      {
+        "key": "barAppearance",
+        "type": "enum",
+        "label": "Bar appearance",
+        "options": [
+          "icon",
+          "bordered",
+          "text"
+        ],
+        "defaultValue": "icon",
+        "description": "Filled badge, outlined badge, or plain text."
+      },
+      {
+        "key": "showSourceName",
+        "type": "boolean",
+        "label": "Show layout name in bar",
+        "defaultValue": false
+      },
+      {
+        "key": "showEmojiAndSymbols",
+        "type": "boolean",
+        "label": "Show emoji picker in menu",
+        "defaultValue": true
+      },
+      {
+        "key": "showKeyboardViewer",
+        "type": "boolean",
+        "label": "Show keyboard viewer in menu",
+        "defaultValue": true
+      },
+      {
+        "key": "showSourceNameMenuItem",
+        "type": "boolean",
+        "label": "Show layout name toggle in menu",
+        "defaultValue": true
+      },
+      {
+        "key": "showKeyboardSettings",
+        "type": "boolean",
+        "label": "Show keyboard settings in menu",
+        "defaultValue": true
+      },
+      {
+        "key": "keyboardViewerGeometry",
+        "type": "enum",
+        "label": "Keyboard shape",
+        "options": [
+          "auto",
+          "ansi",
+          "iso",
+          "abnt",
+          "jis"
+        ],
+        "defaultValue": "auto",
+        "description": "Auto selects a shape from the layout and keyboard model."
+      }
     ]
   }
 }
