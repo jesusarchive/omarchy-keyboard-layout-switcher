@@ -19,7 +19,7 @@ Panel {
   readonly property bool showSourceName: setting("showSourceName", false) === true
   readonly property string barAppearance: setting("barAppearance", "icon")
   readonly property bool showEmojiAndSymbols: setting("showEmojiAndSymbols", true) !== false
-  readonly property bool showKeyboardViewer: setting("showKeyboardViewer", false) === true
+  readonly property bool showKeyboardViewer: setting("showKeyboardViewer", true) !== false
   readonly property string keyboardViewerGeometry: setting("keyboardViewerGeometry", "auto")
   readonly property bool showSourceNameMenuItem: setting("showSourceNameMenuItem", true) !== false
   readonly property bool showKeyboardSettings: setting("showKeyboardSettings", true) !== false

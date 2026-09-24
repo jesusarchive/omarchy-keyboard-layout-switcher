@@ -58,14 +58,8 @@ different combination if you need it there.
 
 ## Show the keyboard viewer
 
-The viewer is in beta and is hidden from the menu by default. Add its menu row
-with:
-
-```bash
-omarchy bar set jesusarchive.keyboard-layout-switcher showKeyboardViewer true --json
-```
-
-Choose **Show Keyboard Viewer**, or run
+The viewer is in beta and appears in the menu by default. Choose
+**Show Keyboard Viewer**, or run
 `omarchy-shell jesusarchive.keyboard-layout-switcher viewer`. The viewer opens
 on the focused screen. Click a key to type into the focused application.
 
@@ -95,7 +89,7 @@ need `--json` so Omarchy stores a boolean rather than a string.
 | `barAppearance` | `icon` | Closed bar icon: `icon`, `bordered`, or `text` |
 | `showSourceName` | `false` | Show the full name beside the bar icon |
 | `showEmojiAndSymbols` | `true` | Show the emoji menu row |
-| `showKeyboardViewer` | `false` | Show the viewer menu row |
+| `showKeyboardViewer` | `true` | Show the viewer menu row |
 | `keyboardViewerGeometry` | `auto` | Viewer shape: `auto`, `ansi`, `iso`, `abnt`, or `jis` |
 | `showSourceNameMenuItem` | `true` | Show the source-name toggle |
 | `showKeyboardSettings` | `true` | Show the input settings action |
