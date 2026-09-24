@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "jesusarchive.keyboard-layout-switcher",
   "name": "Keyboard Layout Switcher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "jesusarchive",
   "license": "MIT",
-  "description": "Switch keyboard layouts from the bar or a shortcut, with an optional on-screen keyboard.",
+  "description": "Choose an input source from the Omarchy bar, switch with a shortcut, and optionally use a clickable keyboard viewer.",
   "kinds": ["bar-widget", "service"],
   "entryPoints": {
     "barWidget": "Widget.qml",
@@ -13,7 +13,7 @@
   },
   "barWidget": {
     "displayName": "Keyboard Layout Switcher",
-    "description": "Shows the active keyboard layout. Click to choose another.",
+    "description": "Shows the active input source. Open the menu to switch layouts or launch the keyboard viewer.",
     "category": "Compositor",
     "aliases": ["keyboard", "input", "language", "layout", "input-source"],
     "allowMultiple": false,
@@ -28,10 +28,10 @@
       "showKeyboardSettings": true
     },
     "schema": [
-      { "key": "barAppearance", "type": "enum", "label": "Bar Appearance", "options": ["icon", "bordered", "text"], "defaultValue": "icon", "description": "Choose a filled badge, an outlined badge, or plain text." },
-      { "key": "showSourceName", "type": "boolean", "label": "Show Input Source Name in Bar", "defaultValue": false, "description": "Show the full layout name beside the layout indicator." },
+      { "key": "barAppearance", "type": "enum", "label": "Bar Appearance", "options": ["icon", "bordered", "text"], "defaultValue": "icon", "description": "Show the layout icon, an outlined code, or plain text while the menu is closed." },
+      { "key": "showSourceName", "type": "boolean", "label": "Show Input Source Name in Bar", "defaultValue": false, "description": "Show the full input source name beside the layout or keyboard icon." },
       { "key": "showEmojiAndSymbols", "type": "boolean", "label": "Show Emoji & Symbols in Menu", "defaultValue": true },
-      { "key": "showKeyboardViewer", "type": "boolean", "label": "Show Keyboard Viewer in Menu", "defaultValue": false, "description": "Beta. Adds a menu item that opens an on-screen keyboard." },
+      { "key": "showKeyboardViewer", "type": "boolean", "label": "Show Keyboard Viewer in Menu", "defaultValue": false, "description": "Beta. Add a menu item that opens the clickable keyboard viewer." },
       { "key": "keyboardViewerGeometry", "type": "enum", "label": "Keyboard Viewer Shape", "options": ["auto", "ansi", "iso", "abnt", "jis"], "defaultValue": "auto", "description": "The physical keyboard the viewer draws. Auto uses JIS for Japanese, ABNT for Brazilian, ANSI for US and ISO otherwise." },
       { "key": "showSourceNameMenuItem", "type": "boolean", "label": "Show Input Source Name in Menu", "defaultValue": true },
       { "key": "showKeyboardSettings", "type": "boolean", "label": "Show Keyboard Settings in Menu", "defaultValue": true }

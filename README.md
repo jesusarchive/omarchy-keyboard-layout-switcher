@@ -1,22 +1,25 @@
 # Keyboard Layout Switcher
 
-Choose a keyboard layout from the Omarchy bar. Add shortcuts to switch without
-opening the menu.
+See your active input source in the Omarchy bar, switch layouts from its menu
+or a shortcut, and optionally open a clickable keyboard viewer.
 
 ## Bar and menu
 
-The bar indicator shows a short code for the active layout.
+The bar shows an icon with a short code for the active layout. While the menu
+is open, it shows a keyboard icon instead. If you enable the input source name,
+the full name stays visible beside either icon.
 
 ![Keyboard layout indicator with the menu closed](bar-closed.png)
 
 Left or right click the indicator to open the menu. The active layout has a
 check mark. Choosing a layout switches your keyboards together.
 
-![Keyboard layout menu open in the Omarchy bar](preview.png)
+![Keyboard layout menu with the active layout checked](preview.png)
 
 The menu also includes Emoji & Symbols, a source-name toggle, and an action to
-open `~/.config/hypr/input.lua` in your editor. Use arrows or `j`/`k` to move,
-Enter or Space to select, and Esc to close.
+open `~/.config/hypr/input.lua` in your editor. You can optionally add the
+keyboard viewer to the menu. Use arrows or `j`/`k` to move, Enter or Space to
+select, and Esc to close.
 
 ## Requirements
 
@@ -69,13 +72,15 @@ The indicator starts in the right section of the bar. To move it:
 omarchy bar move jesusarchive.keyboard-layout-switcher --section center
 ```
 
-The default style is a filled badge. Set `barAppearance` to `bordered` for an
-outline or `text` for plain text. `showSourceName` adds the full layout name:
+The default `barAppearance` is `icon`. Set it to `bordered` for an outlined
+code or `text` for plain text. `showSourceName` adds the full layout name:
 
 ```bash
 omarchy bar set jesusarchive.keyboard-layout-switcher barAppearance bordered
 omarchy bar set jesusarchive.keyboard-layout-switcher showSourceName true --json
 ```
+
+![Keyboard icon and full input source name while the menu is open](bar-source-name.png)
 
 Set a menu row's key to `true` to show it or `false` to hide it:
 
@@ -104,13 +109,14 @@ omarchy bar set jesusarchive.keyboard-layout-switcher showKeyboardViewer true --
 ```
 
 Then choose **Show Keyboard Viewer** from the menu to open a floating keyboard
-for the active layout. The `viewer` command opens it whether or not the menu
+for the active layout. The `viewer` command toggles it whether or not the menu
 row is shown. It opens in the center of the focused screen. Click keys to type
 into the focused application.
 
 - **Modifiers** work like macOS sticky keys. Click Shift, Ctrl, Alt, Super or
   AltGr once to apply it to the next key, or twice quickly to lock it. Click it
-  again to turn it off. Ctrl, Alt and Super send shortcuts such as Ctrl+C.
+  again to turn it off. Ctrl, Alt and Super send shortcuts such as Ctrl+C. Caps
+  Lock toggles the viewer's letter case.
 - **Accent keys** are outlined. Click one, then a letter, to type the accented
   letter. The result is the same as on your physical keyboard.
 - **Press and hold** a letter to choose an accented form. Hold Backspace, Space
@@ -132,7 +138,7 @@ keyboard. Its Caps Lock starts in sync with your keyboard but then changes
 only the viewer. With Hyprland's default `follow_mouse`, crossing another
 window on the way to the viewer moves keyboard focus to that window.
 
-![Keyboard viewer showing the English (US) layout](keyboard-viewer.png)
+![Centered keyboard viewer showing the English (US) layout](keyboard-viewer.png)
 
 ## Commands
 
