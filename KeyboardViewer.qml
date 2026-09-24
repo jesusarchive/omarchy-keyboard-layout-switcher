@@ -400,15 +400,15 @@ Item {
       Column {
         id: viewerColumn
         x: card.contentLeftInset
-        y: card.gap * 2
+        y: Math.round(card.gap * 2.5)
         width: card.innerWidth
-        spacing: card.gap
+        spacing: Math.round(card.gap * 1.5)
 
         // Title bar: the title in the middle, close on the right as elsewhere
         // on Linux.
         Item {
           width: parent.width
-          height: Math.round(card.pitch * 0.46)
+          height: Math.round(card.pitch * 0.52)
 
           MouseArea {
             id: dragArea
