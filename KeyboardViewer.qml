@@ -376,7 +376,7 @@ Item {
     BorderSurface {
       id: card
       width: root.viewerWidth
-      height: viewerColumn.implicitHeight + contentTopInset + contentBottomInset
+      height: viewerColumn.implicitHeight + viewerColumn.y + contentBottomInset
       radius: Math.max(Style.cornerRadius, Style.space(12))
       color: Color.menu.background
       borderSpec: Border.surfaceSpec("menu", "border", Color.menu.border, 1)
@@ -400,22 +400,22 @@ Item {
       Column {
         id: viewerColumn
         x: card.contentLeftInset
-        y: card.contentTopInset
+        y: card.gap * 2
         width: card.innerWidth
-        spacing: card.gap * 2
+        spacing: card.gap
 
         // Title bar: the title in the middle, close on the right as elsewhere
         // on Linux.
         Item {
           width: parent.width
-          height: Math.round(card.pitch * 0.62)
+          height: Math.round(card.pitch * 0.46)
 
           MouseArea {
             id: dragArea
             x: -card.contentLeftInset
-            y: -card.contentTopInset
+            y: -viewerColumn.y
             width: card.width
-            height: parent.height + card.contentTopInset
+            height: parent.height + viewerColumn.y
             cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
             drag.target: card
             drag.axis: Drag.XAndYAxis
