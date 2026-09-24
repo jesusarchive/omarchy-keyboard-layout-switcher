@@ -99,7 +99,7 @@ function composed(keymap, dead, keysym) {
   return table && table[keysym] ? table[keysym] : ""
 }
 
-// What a dead key types on its own: dead key then Space, from Compose.
+// What a dead key types on its own when Compose has no dead key + Space entry.
 var SPACING_FALLBACK = {
   dead_acute: "´", dead_grave: "`", dead_circumflex: "^", dead_tilde: "~",
   dead_diaeresis: "¨", dead_cedilla: "¸", dead_caron: "ˇ", dead_breve: "˘",
@@ -198,7 +198,7 @@ function press(keymap, state, id, now) {
 }
 
 // Super uses the physical base key for shortcuts, so show that key on the
-// viewer. Ctrl keeps the visible layer, as on the reference viewer.
+// viewer. Ctrl keeps the visible layer, as macOS's Keyboard Viewer does.
 function displayState(state) {
   if (!state.logo) return state
   var shown = copy(state)

@@ -4,7 +4,7 @@
 // line up. A key that appears in two rows (the ISO Enter) becomes one L-shaped
 // key. ARROWS expands into an inverted T of half-height keys.
 
-var ROWS = 15
+var ROW_UNITS = 15
 
 function k(id, units) { return { id: id, units: units || 1 } }
 
@@ -18,7 +18,7 @@ var HOME = ids("AC01 AC02 AC03 AC04 AC05 AC06 AC07 AC08 AC09 AC10 AC11")
 var BOTTOM = ids("AB01 AB02 AB03 AB04 AB05 AB06 AB07 AB08 AB09 AB10")
 var SPACE_ROW = [k("LCTL", 1.25), k("LWIN", 1.25), k("LALT", 1.25), k("SPCE", 7), k("RALT", 1.25), k("ARROWS", 3)]
 
-// Row heights in units. The function row is shorter, as on most laptops.
+// The function row is 0.75 units tall, as on most laptops; other rows are 1.
 var FUNCTION_HEIGHT = 0.75
 
 var GEOMETRIES = {
@@ -38,7 +38,7 @@ var GEOMETRIES = {
     [k("LFSH", 1.25), k("LSGT")].concat(BOTTOM, [k("RTSH", 2.75)]),
     SPACE_ROW
   ],
-  // Brazilian ABNT2 adds a key between the period row's last key and Shift.
+  // Brazilian ABNT2 adds a slash key between the bottom row and right Shift.
   abnt: [
     FUNCTION_ROW,
     DIGITS.concat([k("BKSP", 2)]),
@@ -99,7 +99,7 @@ function place(name, pitch, gap) {
     })
     y += height + gap
   })
-  return { keys: keys, width: ROWS * pitch - gap, height: y - gap }
+  return { keys: keys, width: ROW_UNITS * pitch - gap, height: y - gap }
 }
 
 // Grow a key down into the next row as an L: the top part keeps its width and
@@ -129,5 +129,5 @@ function arrows(x, y, pitch, height, gap) {
 }
 
 if (typeof module !== "undefined") {
-  module.exports = { GEOMETRIES: GEOMETRIES, ROWS: ROWS, geometryFor: geometryFor, rowUnits: rowUnits, place: place }
+  module.exports = { GEOMETRIES: GEOMETRIES, ROW_UNITS: ROW_UNITS, geometryFor: geometryFor, rowUnits: rowUnits, place: place }
 }

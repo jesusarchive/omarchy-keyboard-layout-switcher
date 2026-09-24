@@ -382,8 +382,8 @@ Item {
       padding: Style.spacing.panelPadding
 
       readonly property real innerWidth: width - contentLeftInset - contentRightInset
-      readonly property real gap: Math.max(3, Math.round(innerWidth / ViewerLayout.ROWS * 0.08))
-      readonly property real pitch: (innerWidth + gap) / ViewerLayout.ROWS
+      readonly property real gap: Math.max(3, Math.round(innerWidth / ViewerLayout.ROW_UNITS * 0.08))
+      readonly property real pitch: (innerWidth + gap) / ViewerLayout.ROW_UNITS
       readonly property var placed: ViewerLayout.place(root.geometryName, pitch, gap)
 
       // Keep the whole card on screen when it grows or changes shape.
@@ -735,8 +735,6 @@ Item {
 
       ShapePath {
         readonly property real r: keyFace.radius
-        readonly property real w: keyFace.width
-        readonly property real h: keyFace.height
         readonly property real inset: keyFace.edgeWidth / 2
         fillColor: keyFace.fill
         strokeColor: keyFace.edgeWidth > 0 ? keyFace.edge : "transparent"

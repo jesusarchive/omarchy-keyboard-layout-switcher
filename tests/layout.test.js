@@ -16,7 +16,7 @@ function areas(placed) {
 test("every row of every geometry is 15 units wide", () => {
   for (const name of names) {
     ViewerLayout.GEOMETRIES[name].forEach((row, index) => {
-      assert.strictEqual(ViewerLayout.rowUnits(row), ViewerLayout.ROWS, `${name} row ${index}`)
+      assert.strictEqual(ViewerLayout.rowUnits(row), ViewerLayout.ROW_UNITS, `${name} row ${index}`)
     })
   }
 })

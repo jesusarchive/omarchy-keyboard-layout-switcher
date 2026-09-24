@@ -5,7 +5,8 @@
   "version": "0.2.1",
   "author": "jesusarchive",
   "license": "MIT",
-  "description": "Switch keyboard layouts from the Omarchy bar. Open the clickable keyboard viewer or Omarchy's Emojis picker from the menu.",
+  "description": "Switch keyboard layouts from the Omarchy bar or with Ctrl+Space, and type any layout's characters from a clickable keyboard viewer.",
+  "homepage": "https://github.com/jesusarchive/omarchy-keyboard-layout-switcher",
   "kinds": ["bar-widget", "service"],
   "entryPoints": {
     "barWidget": "Widget.qml",
@@ -13,7 +14,7 @@
   },
   "barWidget": {
     "displayName": "Keyboard Layout Switcher",
-    "description": "Shows the active keyboard layout. Click to choose another.",
+    "description": "The current keyboard layout, with a menu to switch layouts and open the keyboard viewer.",
     "category": "Compositor",
     "aliases": ["keyboard", "input", "language", "layout", "input-source"],
     "allowMultiple": false,
@@ -28,12 +29,12 @@
       "showKeyboardSettings": true
     },
     "schema": [
-      { "key": "barAppearance", "type": "enum", "label": "Bar Appearance", "options": ["icon", "bordered", "text"], "defaultValue": "icon", "description": "Choose the icon, outlined code, or text shown when the menu is closed." },
+      { "key": "barAppearance", "type": "enum", "label": "Bar Appearance", "options": ["icon", "bordered", "text"], "defaultValue": "icon", "description": "Show the layout code as a filled badge, an outlined badge, or plain text." },
       { "key": "showSourceName", "type": "boolean", "label": "Show Input Source Name in Bar", "defaultValue": false, "description": "Show the full layout name beside the bar indicator." },
-      { "key": "showEmojiAndSymbols", "type": "boolean", "label": "Show Emojis in Menu", "defaultValue": true, "description": "Open Omarchy's built-in Emojis picker from the layout menu." },
-      { "key": "showKeyboardViewer", "type": "boolean", "label": "Show Keyboard Viewer in Menu", "defaultValue": true },
-      { "key": "showSourceNameMenuItem", "type": "boolean", "label": "Show Input Source Name in Menu", "defaultValue": true },
-      { "key": "showKeyboardSettings", "type": "boolean", "label": "Show Keyboard Settings in Menu", "defaultValue": true },
+      { "key": "showEmojiAndSymbols", "type": "boolean", "label": "Show Emojis in Menu", "defaultValue": true, "description": "Add a menu item that opens Omarchy's Emojis picker." },
+      { "key": "showKeyboardViewer", "type": "boolean", "label": "Show Keyboard Viewer in Menu", "defaultValue": true, "description": "Add a menu item that opens the clickable keyboard viewer." },
+      { "key": "showSourceNameMenuItem", "type": "boolean", "label": "Show Input Source Name in Menu", "defaultValue": true, "description": "Add a menu item that toggles the layout name in the bar." },
+      { "key": "showKeyboardSettings", "type": "boolean", "label": "Show Keyboard Settings in Menu", "defaultValue": true, "description": "Add a menu item that opens ~/.config/hypr/input.lua in your editor." },
       { "key": "keyboardViewerGeometry", "type": "enum", "label": "Keyboard Viewer Shape (Advanced)", "options": ["auto", "ansi", "iso", "abnt", "jis"], "defaultValue": "auto", "description": "Override the viewer's physical key shape if Auto does not match your keyboard." }
     ]
   }

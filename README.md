@@ -1,32 +1,56 @@
 # Keyboard Layout Switcher
 
-Switch keyboard layouts from the Omarchy bar. The plugin reads
-`~/.config/hypr/input.lua` and switches all connected keyboards together.
+Switch keyboard layouts from the Omarchy bar or with Ctrl+Space, and type any
+layout's characters from a clickable keyboard viewer. Every connected keyboard
+switches together.
 
 ![Keyboard layout menu with English and Spanish](preview.png)
 
-## Install
+## Requirements
 
-Requires Omarchy Quattro.
+- Omarchy Quattro
+- Your layouts in `kb_layout` in `~/.config/hypr/input.lua`, for example
+  `kb_layout = "us,es"` for English (US) and Spanish
+
+The plugin uses `hyprctl`, `xkbcli`, `python3` and `wtype`, which Omarchy
+installs by default. It has no other dependencies.
+
+## Install
 
 ```bash
 omarchy plugin add https://github.com/jesusarchive/omarchy-keyboard-layout-switcher.git --enable
 ```
 
+If Omarchy's built-in keyboard layout widget is also in your bar, hide it:
+
+```bash
+omarchy plugin disable omarchy.keyboard-layout
+```
+
 ## Use
 
 Click the bar icon and choose a layout. A check mark shows the active layout.
-The menu also opens Omarchy's Emojis picker, the keyboard viewer, and
-`~/.config/hypr/input.lua` in your editor. Use **Show Input Source Name** to
-display the full layout name in the bar.
+Below the layouts:
+
+- **Show Emojis** opens Omarchy's Emojis picker.
+- **Show Keyboard Viewer** opens the [keyboard viewer](#keyboard-viewer).
+- **Show Input Source Name** shows the full layout name in the bar.
+- **Open Keyboard Settings…** opens `~/.config/hypr/input.lua` in your editor.
 
 Use the arrow keys or `j`/`k` to move through the menu, Enter to select, and
 Esc to close.
 
 ![Keyboard icon and input source name while the menu is open](bar-source-name.png)
 
-For example, `kb_layout = "us,es"` in `~/.config/hypr/input.lua` gives you
-English (US) and Spanish.
+## Settings
+
+Open the bar editor to change these:
+
+- **Bar Appearance**: a filled badge, an outlined badge, or plain text.
+- **Show Input Source Name in Bar**: the full layout name beside the badge.
+- **Show … in Menu**: hide any of the menu items above.
+- **Keyboard Viewer Shape**: ANSI, ISO, ABNT or JIS, if Auto picks the wrong
+  one for your keyboard.
 
 ## Optional shortcuts
 
@@ -43,9 +67,20 @@ bindings if they conflict with your apps.
 
 ![Layout switcher with Spanish selected](shortcut-switcher.png)
 
+Scripts can use the same commands:
+
+```bash
+omarchy-shell jesusarchive.keyboard-layout-switcher set es      # by layout, code (ES) or index
+omarchy-shell jesusarchive.keyboard-layout-switcher current     # prints the active code, e.g. EN
+omarchy-shell jesusarchive.keyboard-layout-switcher list        # all layouts as JSON
+omarchy-shell jesusarchive.keyboard-layout-switcher toggle      # open or close the menu
+omarchy-shell jesusarchive.keyboard-layout-switcher viewer      # open or close the keyboard viewer
+```
+
 ## Keyboard viewer
 
-Choose **Show Keyboard Viewer** from the menu. Click its keys to type.
+Choose **Show Keyboard Viewer** from the menu. It shows the active layout and
+types into the app that has keyboard focus.
 
 ![Keyboard viewer with the English (US) layout](keyboard-viewer.png)
 
@@ -56,9 +91,7 @@ Choose **Show Keyboard Viewer** from the menu. Click its keys to type.
 - Drag the header to move the viewer, use the bottom-right corner to resize it,
   and click × to close it.
 
-The viewer types into the app that has keyboard focus. It does not highlight
-physical key presses. If its shape does not match your keyboard, change
-**Keyboard Viewer Shape** in the bar editor.
+The viewer does not highlight physical key presses.
 
 ## Update or remove
 
@@ -67,7 +100,10 @@ omarchy plugin update jesusarchive.keyboard-layout-switcher
 omarchy plugin remove jesusarchive.keyboard-layout-switcher
 ```
 
-If you added keybindings, remove them from `~/.config/hypr/bindings.lua` when
-you remove the plugin.
+If you added the shortcuts, remove them from `~/.config/hypr/bindings.lua`. If
+you hid the built-in widget, bring it back with
+`omarchy plugin enable omarchy.keyboard-layout`.
 
-Licensed under [MIT](LICENSE).
+## License
+
+[MIT](LICENSE)

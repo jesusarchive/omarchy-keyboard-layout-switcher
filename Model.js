@@ -147,8 +147,7 @@ function readDevices(json, catalog, namedByEvent) {
   }
 }
 
-// The activelayout event is "keyboard,description"; a description can carry
-// its own comma, so only split once.
+// The physical keyboard named by an activelayout event, or "".
 function eventKeyboardName(data) {
   var name = eventDevice(data)
   return isVirtualKeyboard(name) ? "" : name
@@ -160,6 +159,8 @@ function isVirtualKeyboardEvent(data) {
   return isVirtualKeyboard(eventDevice(data))
 }
 
+// The activelayout event is "keyboard,description"; a description can carry
+// its own comma, so only split once.
 function eventDevice(data) {
   var text = String(data || "")
   var comma = text.indexOf(",")
