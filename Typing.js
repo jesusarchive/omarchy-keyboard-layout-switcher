@@ -197,11 +197,19 @@ function press(keymap, state, id, now) {
   return { state: releaseLatched(clearDead(state)), commands: commands }
 }
 
-// Ctrl, Alt and Super do not change which symbols are printed on the keys.
-function displayState(state) { return state }
+// Super uses the physical base key for shortcuts, so show that key on the
+// viewer. Ctrl keeps the visible layer, as on the reference viewer.
+function displayState(state) {
+  if (!state.logo) return state
+  var shown = copy(state)
+  shown.shift = 0
+  shown.caps = false
+  shown.altgr = 0
+  return shown
+}
 
 // Corner labels show the Shift symbol on the base and AltGr layers only.
-function showsAlternates(state) { return !state.shift }
+function showsAlternates(state) { return !state.shift && !state.logo }
 
 // Press-and-hold choices for a key in the current state.
 function accentsFor(keymap, id, state) {

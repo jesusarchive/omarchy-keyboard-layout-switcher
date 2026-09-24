@@ -144,6 +144,9 @@ Panel {
   visible: svc !== null && layouts.length > 0
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
+  // Match the bar's open-panel mark to the painted icon and optional name.
+  readonly property real openPanelIndicatorWidth: iconRow.implicitWidth
+  readonly property real openPanelIndicatorHeight: Math.max(Style.space(10), Math.round(Style.bar.iconSlot * 0.55))
 
   // ------------------------------------------------------------- bar icon
 
@@ -156,17 +159,6 @@ Panel {
     fixedWidth: iconRow.implicitWidth + Style.space(12)
     // Both mouse buttons open the menu, like other bar widgets.
     onPressed: root.toggle()
-
-    // Indicate that the menu is open.
-    Rectangle {
-      anchors.centerIn: parent
-      width: iconRow.implicitWidth + Style.space(8)
-      height: Math.min(parent.height - Style.space(4), Style.space(22))
-      radius: Math.min(Style.cornerRadius, height / 2)
-      color: Util.alpha(root.foreground, 0.16)
-      opacity: root.opened ? 1 : 0
-      Behavior on opacity { NumberAnimation { duration: 120 } }
-    }
 
     Row {
       id: iconRow
@@ -305,24 +297,18 @@ Panel {
   Component {
     id: menuRow
 
-    Item {
+    CursorSurface {
       id: rowItem
       readonly property var row: parent ? parent.rowData : null
       readonly property int rowIndex: parent ? parent.rowIndex : -1
       readonly property bool hot: root.cursorActive && root.cursorIndex === rowIndex
       readonly property bool checked: !!row && (row.kind === "layout" ? row.index === root.activeIndex : row.checked === true)
-      readonly property color textColor: hot ? Color.menu.selectedText : Color.popups.text
+      readonly property color textColor: Color.popups.text
 
       implicitHeight: Style.space(28)
       implicitWidth: rowContent.implicitWidth + Style.space(22)
-
-      Rectangle {
-        anchors.fill: parent
-        radius: Math.min(Style.cornerRadius, height / 2)
-        color: rowItem.hot ? Color.menu.selectedBackground : "transparent"
-        border.width: rowItem.hot ? 1 : 0
-        border.color: Color.menu.selectedBorder
-      }
+      hasCursor: hot
+      foreground: Color.popups.text
 
       Row {
         id: rowContent
@@ -330,7 +316,6 @@ Panel {
         x: Style.space(6)
         spacing: Style.space(6)
 
-        // Mark the active layout and checked options.
         Text {
           width: Style.space(14)
           anchors.verticalCenter: parent.verticalCenter

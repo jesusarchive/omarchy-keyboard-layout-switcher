@@ -204,10 +204,11 @@ test("corner labels show the Shift symbol, but not for letter case pairs", () =>
   assert.strictEqual(Typing.alternateLabel(keymap, "AE01", altgr), "¡")
 })
 
-test("Shift hides corner labels while shortcut modifiers leave them visible", () => {
+test("Shift and Super hide corner labels, while Ctrl keeps them", () => {
   assert.strictEqual(Typing.showsAlternates(fresh()), true)
   assert.strictEqual(Typing.showsAlternates(run(fresh(), ["LFSH"]).state), false)
   assert.strictEqual(Typing.showsAlternates(run(fresh(), ["LCTL"]).state), true)
+  assert.strictEqual(Typing.showsAlternates(run(fresh(), ["LWIN"]).state), false)
 })
 
 test("Ctrl keeps the visible Shift, Caps and AltGr layers", () => {
@@ -217,6 +218,15 @@ test("Ctrl keeps the visible Shift, Caps and AltGr layers", () => {
   assert.strictEqual(Typing.label(keymap, "AD03", Typing.displayState(caps)), "E")
   const altgr = run(fresh(), ["RALT", "LCTL"]).state
   assert.strictEqual(Typing.label(keymap, "AD03", Typing.displayState(altgr)), "€")
+})
+
+test("Super shows the physical base key used by shortcuts", () => {
+  const shifted = run(fresh(), ["LFSH", "LWIN"]).state
+  assert.strictEqual(Typing.label(keymap, "AD03", Typing.displayState(shifted)), "e")
+  const altgr = run(fresh(), ["RALT", "LWIN"]).state
+  assert.strictEqual(Typing.label(keymap, "AD03", Typing.displayState(altgr)), "e")
+  const caps = run(Typing.initialState(true), ["LWIN"]).state
+  assert.strictEqual(Typing.label(keymap, "AD03", Typing.displayState(caps)), "e")
 })
 
 test("Ctrl with AltGr sends the physical key chord, including on blank AltGr keys", () => {

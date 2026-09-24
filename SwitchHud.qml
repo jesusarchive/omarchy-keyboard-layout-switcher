@@ -56,9 +56,6 @@ Item {
   property color foreground: Color.menu.text
   property color border: Color.menu.border
   property var borderSpec: Border.surfaceSpec("menu", "border", border, Math.max(1, Style.space(2)))
-  property color selectedBackground: Color.menu.selectedBackground
-  property color selectedText: Color.menu.selectedText
-  property var selectedBorderSpec: Border.surfaceSpec("menu", "selected-border", Color.menu.selectedBorder, 0)
   readonly property int cornerRadius: Style.cornerRadius
   property string fontFamily: Style.font.menuFamily
   property int contentMargin: Style.spacing.panelPadding
@@ -176,16 +173,16 @@ Item {
             id: switcherRepeater
             model: root.service.layouts
 
-            BorderSurface {
+            CursorSurface {
               required property var modelData
-              readonly property bool current: modelData.index === root.service.activeIndex
+              readonly property bool selected: modelData.index === root.service.activeIndex
               readonly property real labelWidth: nameText.implicitWidth
 
               width: switcherColumn.rowWidth
               height: Math.max(Style.space(40), Style.font.heading + Style.space(20))
               radius: root.cornerRadius
-              color: current ? root.selectedBackground : "transparent"
-              borderSpec: current ? root.selectedBorderSpec : Border.none()
+              hasCursor: selected
+              foreground: root.foreground
 
               // Show full layout names in the switcher.
               Text {
@@ -193,7 +190,7 @@ Item {
                 anchors.centerIn: parent
                 textFormat: Text.PlainText
                 text: modelData.name
-                color: parent.current ? root.selectedText : root.foreground
+                color: root.foreground
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.heading
               }
