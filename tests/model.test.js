@@ -196,3 +196,14 @@ test("switchCommands keeps special characters in one argument", () => {
     ["hyprctl", "switchxkblayout", "evil; dispatch exit", "0"]
   ])
 })
+
+test("readDevices reports Caps Lock when any keyboard has it on", () => {
+  assert.strictEqual(Model.readDevices(devices(), catalog, "").capsLock, false)
+  assert.strictEqual(Model.readDevices(devices({ capsLock: true }), catalog, "").capsLock, true)
+})
+
+test("activelayout events from virtual keyboards are recognised", () => {
+  assert.strictEqual(Model.isVirtualKeyboardEvent("hl-virtual-keyboard-wtype,English (US)"), true)
+  assert.strictEqual(Model.isVirtualKeyboardEvent("hl-virtual-keyboard-fcitx5,error"), true)
+  assert.strictEqual(Model.isVirtualKeyboardEvent("at-translated-set-2-keyboard,Spanish"), false)
+})

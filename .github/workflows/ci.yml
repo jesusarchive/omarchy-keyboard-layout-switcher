@@ -24,6 +24,14 @@ jobs:
       - name: Model tests
         run: node --test tests/*.test.js
 
+      # keyboard_viewer.py reads layouts through libxkbcommon, using the XKB
+      # data and the Compose tables that a desktop system ships.
+      - name: Keymap reader tests
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libxkbcommon0 xkb-data libx11-data
+          python3 -m unittest discover -s tests -p "test_*.py" -v
+
       # The real check is `omarchy plugin validate .`, which needs an Omarchy
       # install. These are the parts of it that run anywhere, so a broken
       # manifest or a stray symlink fails here rather than at submission.

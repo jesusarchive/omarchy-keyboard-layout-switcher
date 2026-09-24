@@ -1,4 +1,4 @@
-# Keyboard Layout Switcher for Omarchy
+# Keyboard Layout Switcher
 
 Choose a keyboard layout from the Omarchy bar. Add shortcuts to switch without
 opening the menu.
@@ -14,9 +14,9 @@ check mark. Choosing a layout switches your keyboards together.
 
 ![Keyboard layout menu open in the Omarchy bar](preview.png)
 
-The menu also includes Emoji & Symbols, a keyboard viewer, a source-name toggle,
-and an action to open `~/.config/hypr/input.lua` in your editor. Use arrows or
-`j`/`k` to move, Enter or Space to select, and Esc to close.
+The menu also includes Emoji & Symbols, a source-name toggle, and an action to
+open `~/.config/hypr/input.lua` in your editor. Use arrows or `j`/`k` to move,
+Enter or Space to select, and Esc to close.
 
 ## Requirements
 
@@ -77,20 +77,19 @@ omarchy bar set jesusarchive.keyboard-layout-switcher barAppearance bordered
 omarchy bar set jesusarchive.keyboard-layout-switcher showSourceName true --json
 ```
 
-All four optional menu rows appear by default. Set a row's key to `false` to
-hide it:
+Set a menu row's key to `true` to show it or `false` to hide it:
 
-| Key | Menu row |
-| --- | --- |
-| `showEmojiAndSymbols` | Show Emoji & Symbols |
-| `showKeyboardViewer` | Show Keyboard Viewer |
-| `showSourceNameMenuItem` | Show Input Source Name |
-| `showKeyboardSettings` | Open Keyboard Settings… |
+| Key | Menu row | Default |
+| --- | --- | --- |
+| `showEmojiAndSymbols` | Show Emoji & Symbols | shown |
+| `showKeyboardViewer` | Show Keyboard Viewer | hidden |
+| `showSourceNameMenuItem` | Show Input Source Name | shown |
+| `showKeyboardSettings` | Open Keyboard Settings… | shown |
 
 For example:
 
 ```bash
-omarchy bar set jesusarchive.keyboard-layout-switcher showKeyboardViewer false --json
+omarchy bar set jesusarchive.keyboard-layout-switcher showEmojiAndSymbols false --json
 ```
 
 Use `--json` for boolean values so Omarchy stores `true` or `false` instead of
@@ -98,14 +97,40 @@ strings.
 
 ## Keyboard viewer (beta)
 
-Choose **Show Keyboard Viewer** from the menu to open a floating keyboard for
-the active layout. Click keys to type into the focused application. The on-screen
-Shift and AltGr keys change the symbols shown; accent keys work as dead keys,
-and holding a letter shows accented choices. Drag the strip above the keys to
-move the viewer, or close it with the × at the top right.
+The keyboard viewer is hidden from the menu by default. To add it:
 
-The viewer is in beta. It does not track held physical modifiers, and its
-on-screen Caps key changes only the viewer.
+```bash
+omarchy bar set jesusarchive.keyboard-layout-switcher showKeyboardViewer true --json
+```
+
+Then choose **Show Keyboard Viewer** from the menu to open a floating keyboard
+for the active layout. The `viewer` command opens it whether or not the menu
+row is shown. It opens in the center of the focused screen. Click keys to type
+into the focused application.
+
+- **Modifiers** work like macOS sticky keys. Click Shift, Ctrl, Alt, Super or
+  AltGr once to apply it to the next key, or twice quickly to lock it. Click it
+  again to turn it off. Ctrl, Alt and Super send shortcuts such as Ctrl+C.
+- **Accent keys** are outlined. Click one, then a letter, to type the accented
+  letter. The result is the same as on your physical keyboard.
+- **Press and hold** a letter to choose an accented form. Hold Backspace, Space
+  or an arrow to repeat it.
+- **Drag** the title bar to move the viewer, and drag the bottom-right corner to
+  resize it. Close it with the × at the top right.
+
+The viewer draws the physical keyboard for the layout: JIS for Japanese, ABNT
+for Brazilian, ANSI for US layouts and ISO for the rest. To choose one:
+
+```bash
+omarchy bar set jesusarchive.keyboard-layout-switcher keyboardViewerGeometry iso
+```
+
+The options are `auto`, `ansi`, `iso`, `abnt` and `jis`.
+
+The viewer is in beta. It does not show keys you press on your physical
+keyboard. Its Caps Lock starts in sync with your keyboard but then changes
+only the viewer. With Hyprland's default `follow_mouse`, crossing another
+window on the way to the viewer moves keyboard focus to that window.
 
 ![Keyboard viewer showing the English (US) layout](keyboard-viewer.png)
 

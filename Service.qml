@@ -19,6 +19,9 @@ Item {
   property var keyboards: []
   property string keyboardModel: ""
   property string keyboardOptions: ""
+  property bool capsLock: false
+  // Set by the bar widget from its keyboardViewerGeometry setting.
+  property string viewerGeometry: "auto"
   property bool loaded: false
   property var recent: []
 
@@ -49,6 +52,7 @@ Item {
     keyboards = state.keyboards
     keyboardModel = state.keyboardModel
     keyboardOptions = state.keyboardOptions
+    capsLock = state.capsLock
     if (JSON.stringify(state.layouts) !== JSON.stringify(layouts)) layouts = state.layouts
     // Ignore stale reads immediately after a switch.
     if (!switchGuard.running && state.activeIndex !== activeIndex) {
@@ -156,6 +160,7 @@ Item {
       var name = String(event.name)
       // Both activelayout event variants name the keyboard first.
       if (name.indexOf("activelayout") === 0) {
+        if (Model.isVirtualKeyboardEvent(event.data)) return
         var named = Model.eventKeyboardName(event.data)
         if (named) root._typedKeyboardName = named
         root.refresh()

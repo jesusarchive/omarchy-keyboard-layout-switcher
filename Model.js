@@ -142,17 +142,32 @@ function readDevices(json, catalog, namedByEvent) {
     layouts: layouts(keyboard, catalog),
     activeIndex: keyboard ? (keyboard.active_layout_index || 0) : 0,
     keyboardModel: keyboard ? String(keyboard.model || "") : "",
-    keyboardOptions: keyboard ? String(keyboard.options || "") : ""
+    keyboardOptions: keyboard ? String(keyboard.options || "") : "",
+    capsLock: typed.some(function (k) { return k.capsLock === true })
   }
 }
 
 // The activelayout event is "keyboard,description"; a description can carry
 // its own comma, so only split once.
 function eventKeyboardName(data) {
+  var name = eventDevice(data)
+  return isVirtualKeyboard(name) ? "" : name
+}
+
+// Virtual keyboards (fcitx5, and wtype on every keyboard viewer click) send
+// activelayout events of their own. They never change the typed layout.
+function isVirtualKeyboardEvent(data) {
+  return isVirtualKeyboard(eventDevice(data))
+}
+
+function eventDevice(data) {
   var text = String(data || "")
   var comma = text.indexOf(",")
-  var name = comma === -1 ? text : text.substring(0, comma)
-  return name.indexOf("hl-virtual-keyboard") === 0 ? "" : name
+  return comma === -1 ? text : text.substring(0, comma)
+}
+
+function isVirtualKeyboard(name) {
+  return name.indexOf("hl-virtual-keyboard") === 0
 }
 
 // Returns the most-recently-used order, newest first, dropping any index
@@ -219,6 +234,7 @@ if (typeof module !== "undefined") {
     selectKeyboard: selectKeyboard,
     readDevices: readDevices,
     eventKeyboardName: eventKeyboardName,
+    isVirtualKeyboardEvent: isVirtualKeyboardEvent,
     touchRecent: touchRecent,
     previousIndex: previousIndex,
     nextIndex: nextIndex,

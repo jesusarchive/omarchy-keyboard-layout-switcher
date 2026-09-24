@@ -19,7 +19,8 @@ Panel {
   readonly property bool showSourceName: setting("showSourceName", false) === true
   readonly property string barAppearance: setting("barAppearance", "icon")
   readonly property bool showEmojiAndSymbols: setting("showEmojiAndSymbols", true) !== false
-  readonly property bool showKeyboardViewer: setting("showKeyboardViewer", true) !== false
+  readonly property bool showKeyboardViewer: setting("showKeyboardViewer", false) === true
+  readonly property string keyboardViewerGeometry: setting("keyboardViewerGeometry", "auto")
   readonly property bool showSourceNameMenuItem: setting("showSourceNameMenuItem", true) !== false
   readonly property bool showKeyboardSettings: setting("showKeyboardSettings", true) !== false
   readonly property string screenName: {
@@ -47,7 +48,8 @@ Panel {
     }
     if (showSourceNameMenuItem) {
       out.push({ kind: "separator" })
-      out.push({ kind: "action", action: "sourceName", label: "Show Input Source Name", checked: showSourceName })
+      out.push({ kind: "action", action: "sourceName",
+        label: showSourceName ? "Hide Input Source Name" : "Show Input Source Name" })
     }
     if (showKeyboardSettings) {
       out.push({ kind: "separator" })
@@ -71,6 +73,14 @@ Panel {
   onBarChanged: attachService()
   Component.onCompleted: attachService()
   Component.onDestruction: if (svc) svc.unregisterMenuHost(root)
+
+  // The viewer lives in the service, which has no settings of its own.
+  Binding {
+    when: root.svc !== null
+    target: root.svc
+    property: "viewerGeometry"
+    value: root.keyboardViewerGeometry
+  }
 
   // The service can become available after this widget loads or reloads.
   Timer {
@@ -216,7 +226,7 @@ Panel {
       }
 
       Text {
-        visible: !root.opened && root.showSourceName && root.activeLayout !== null
+        visible: root.showSourceName && root.activeLayout !== null
         anchors.verticalCenter: parent.verticalCenter
         textFormat: Text.PlainText
         text: root.activeLayout ? root.activeLayout.name : ""
