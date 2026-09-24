@@ -21,12 +21,6 @@ installs by default. It has no other dependencies.
 omarchy plugin add https://github.com/jesusarchive/omarchy-keyboard-layout-switcher.git --enable
 ```
 
-If Omarchy's built-in keyboard layout widget is also in your bar, hide it:
-
-```bash
-omarchy plugin disable omarchy.keyboard-layout
-```
-
 ## Use
 
 Click the bar icon and choose a layout. A check mark shows the active layout.
@@ -100,9 +94,7 @@ omarchy plugin update jesusarchive.keyboard-layout-switcher
 omarchy plugin remove jesusarchive.keyboard-layout-switcher
 ```
 
-If you added the shortcuts, remove them from `~/.config/hypr/bindings.lua`. If
-you hid the built-in widget, bring it back with
-`omarchy plugin enable omarchy.keyboard-layout`.
+If you added the shortcuts, remove them from `~/.config/hypr/bindings.lua`.
 
 ## License
 
