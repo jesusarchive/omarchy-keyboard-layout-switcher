@@ -51,7 +51,6 @@ Item {
     return list.length > 0 ? list[0] : null
   }
 
-  // Use the same theme colors and fonts as Omarchy menus.
   property color background: Color.menu.background
   property color foreground: Color.menu.text
   property color border: Color.menu.border

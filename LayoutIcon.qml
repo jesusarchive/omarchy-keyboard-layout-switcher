@@ -1,7 +1,6 @@
 import QtQuick
 import qs.Commons
 
-// Filled layout badge in the bar's colors and font.
 Item {
   id: root
 

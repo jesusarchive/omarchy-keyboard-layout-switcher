@@ -3,8 +3,6 @@ import Quickshell
 import qs.Commons
 import qs.Ui
 
-// Bar indicator and layouts menu. Bar settings can hide optional actions;
-// layout choices stay available.
 Panel {
   id: root
   moduleName: "jesusarchive.keyboard-layout-switcher"
@@ -74,7 +72,7 @@ Panel {
   Component.onCompleted: attachService()
   Component.onDestruction: if (svc) svc.unregisterMenuHost(root)
 
-  // The viewer lives in the service, which has no settings of its own.
+  // The service owns the viewer; the bar widget supplies its shape setting.
   Binding {
     when: root.svc !== null
     target: root.svc
@@ -82,7 +80,7 @@ Panel {
     value: root.keyboardViewerGeometry
   }
 
-  // The service can become available after this widget loads or reloads.
+  // Retry if the service loads after this widget.
   Timer {
     interval: 400
     repeat: true

@@ -42,8 +42,7 @@ Item {
   property real accentPopupX: 0
   property real accentPopupY: 0
 
-  // Width chosen with the resize grip, and dragged positions per monitor, for
-  // this session. 0 means the default width.
+  // Remember width and position for this session. A width of 0 uses the default.
   property real chosenWidth: 0
   property var positions: ({})
 
@@ -86,7 +85,7 @@ Item {
     opened = true
     placeCard()
     load()
-    // Pick up the physical Caps Lock state.
+    // Sync the physical Caps Lock state.
     service.refresh()
   }
 
@@ -264,7 +263,7 @@ Item {
     repeat: true
     onTriggered: {
       interval = 50
-      // Skip a beat rather than build a backlog that types after release.
+      // Skip repeat events while the previous command runs.
       if (root.repeatCommand && !typeProc.running && root.typeQueue.length === 0)
         root.queueType(root.repeatCommand)
     }
@@ -337,7 +336,7 @@ Item {
   function clampX(x) { return Math.max(0, Math.min(x, screenWidth - card.width)) }
   function clampY(y) { return Math.max(0, Math.min(y, screenHeight - card.height)) }
 
-  // Open in the center of the screen. A position dragged this session wins.
+  // Open at a position dragged earlier this session, or in the center.
   function placeCard() {
     var saved = positions[screenKey()]
     if (saved) {
@@ -391,7 +390,6 @@ Item {
       onHeightChanged: if (root.opened) y = root.clampY(y)
       onWidthChanged: if (root.opened) x = root.clampX(x)
 
-      // Clicking empty space closes the accent popup.
       MouseArea {
         anchors.fill: parent
         onClicked: root.closeAccents()
@@ -404,8 +402,6 @@ Item {
         width: card.innerWidth
         spacing: card.gap * 2
 
-        // Title bar: the title in the middle, close on the right as elsewhere
-        // on Linux.
         Item {
           width: parent.width
           height: Math.round(card.pitch * 0.56)
@@ -499,10 +495,8 @@ Item {
               readonly property bool deadKey: layoutKey && !Typing.isChord(root.typing)
                 && Typing.isDeadKey(root.keymap, keyId, root.shown)
 
-              // Flat keys with a hairline edge, as on the macOS keyboard.
-              // Hover brightens the edge. As with macOS sticky keys, a latched
-              // modifier gets an accent outline and a locked one (double-click,
-              // or Caps Lock) an accent fill. Dead keys keep an accent outline.
+              // Latched modifiers have an accent outline. Locked modifiers
+              // have an accent fill. Dead keys keep the outline.
               readonly property bool locked: latch === Typing.LOCKED
               readonly property color faceColor: !live ? Util.alpha(Color.menu.text, 0.04)
                 : locked ? Util.alpha(Color.accent, 0.38)

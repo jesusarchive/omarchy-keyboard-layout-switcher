@@ -4,8 +4,6 @@ import Quickshell.Io
 import Quickshell.Hyprland
 import "Model.js" as Model
 
-// One service for layout state, switching, IPC, and the switcher overlay.
-// Bar widgets read this state on each monitor.
 Item {
   id: root
 
@@ -107,7 +105,6 @@ Item {
     hud.show()
   }
 
-  // Steps to the next layout in order.
   function next() {
     if (layouts.length < 2) return "single"
     select(Model.nextIndex(activeIndex, layouts.length))
